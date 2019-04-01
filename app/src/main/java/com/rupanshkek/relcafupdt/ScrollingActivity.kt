@@ -1,6 +1,8 @@
 package com.rupanshkek.relcafupdt
 
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -13,11 +15,7 @@ import androidx.core.text.HtmlCompat
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.callbacks.onDismiss
 import kotlinx.android.synthetic.main.activity_scrolling.*
-import kotlinx.coroutines.*
 import org.jetbrains.anko.*
-import java.io.IOException
-import java.net.InetSocketAddress
-import java.net.Socket
 
 
 class ScrollingActivity : AppCompatActivity() {
@@ -29,15 +27,23 @@ class ScrollingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_scrolling)
 
         fab.setOnClickListener {
-            val networkTask = GlobalScope.async{ checkNetwork() }
-
-            runBlocking{
-                networkTask.await()
-            }
+            checkNetwork()
 
             if (networkAvail) {
                 updateReq()
                 getLink()
+            } else{
+                MaterialDialog(this@ScrollingActivity).show {
+                    icon(R.drawable.ic_no_wifi)
+                    title(text = "No Internet Access")
+                    message(text = "Turn on Cellular Data/WiFi to fetch updates!")
+                    negativeButton(text = "Quit") { finish(); moveTaskToBack(true) }
+                    onDismiss { finish(); moveTaskToBack(true) }
+                }
+                val latestziptxt = findViewById<TextView>(R.id.latzip)
+                val textView = findViewById<TextView>(R.id.lat_link)
+                textView.visibility = INVISIBLE
+                latestziptxt.visibility = INVISIBLE
             }
         }
 
@@ -47,32 +53,9 @@ class ScrollingActivity : AppCompatActivity() {
 
     // Checks internet access
     private fun checkNetwork(){
-        try {
-            val timeoutMs = 1500
-            val socket = Socket()
-            val socketAddress = InetSocketAddress("8.8.8.8", 53)
-
-            socket.connect(socketAddress, timeoutMs)
-            socket.close()
-
-            networkAvail = true
-        } catch (e: IOException) {
-            doAsync{
-                uiThread {
-                    MaterialDialog(this@ScrollingActivity).show {
-                        icon(R.drawable.ic_no_wifi)
-                        title(text = "No Internet Access")
-                        message(text = "Turn on Cellular Data/WiFi to fetch updates!")
-                        negativeButton(text = "Quit") { finish(); moveTaskToBack(true) }
-                        onDismiss { finish(); moveTaskToBack(true) }
-                    }
-                    val latestziptxt = findViewById<TextView>(R.id.latzip)
-                    val textView = findViewById<TextView>(R.id.lat_link)
-                    textView.visibility = INVISIBLE
-                    latestziptxt.visibility = INVISIBLE
-                }
-            }
-        }
+        val connected = baseContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val netinfo = connected.activeNetworkInfo
+        networkAvail = netinfo != null && netinfo.isConnected
     }
 
     // Displays Update availability
