@@ -6,5 +6,7 @@
     <string name="yerbuild">"Your Build:"</string>
     <string name="ourbuild">"Latest Build:"</string>
     <string name="nonet">"Please Turn on Cellular Data/WiFi!"</string>
+    <string name="testbuild">"Testing Build:"</string>
+    <string name="testing_buttontxt">"Available"</string>
     <string name="action_settings">Settings</string>
 </resources>

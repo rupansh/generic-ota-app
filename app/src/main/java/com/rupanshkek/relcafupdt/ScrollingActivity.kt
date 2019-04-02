@@ -9,11 +9,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View.*
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.*
 import androidx.core.text.HtmlCompat
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.callbacks.onDismiss
+import com.parse.Parse
 import kotlinx.android.synthetic.main.activity_scrolling.*
 import org.jetbrains.anko.*
 
@@ -30,8 +30,8 @@ class ScrollingActivity : AppCompatActivity() {
             checkNetwork()
 
             if (networkAvail) {
-                updateReq()
                 getLink()
+                updateReq()
             } else{
                 MaterialDialog(this@ScrollingActivity).show {
                     icon(R.drawable.ic_no_wifi)
@@ -47,6 +47,14 @@ class ScrollingActivity : AppCompatActivity() {
             }
         }
 
+        Parse.initialize(
+            Parse.Configuration.Builder(this)
+                .applicationId(getString(R.string.appid))
+                .clientKey(getString(R.string.clientkey))
+                .server("https://parseapi.back4app.com")
+                .build()
+        )
+
         fab.performClick()
     }
 
@@ -61,9 +69,16 @@ class ScrollingActivity : AppCompatActivity() {
     // Displays Update availability
     private fun updateReq() {
         doAsync {
-            val checkLatestArr = checkLatest()
+            val checkLatestArr = CheckingUpdates.checkLatest()
+            CheckingUpdates.checkTesting()
 
-            if (checkLatestArr[2].toBoolean()) {
+            while(!CheckingUpdates.isTestingSet){
+                Thread.sleep(500)
+            }
+
+            val checkTestingArr = CheckingUpdates.testingInfo
+
+            if (checkLatestArr[0].toInt() < checkLatestArr[1].toInt()) {
                 val latestLink = getDeviceLink()
 
                 uiThread {
@@ -92,6 +107,52 @@ class ScrollingActivity : AppCompatActivity() {
                     }
                 }
             }
+
+            if(checkTestingArr[0] != "not avail"){
+                val testinglink = checkTestingArr[0]
+                val testingdate = checkTestingArr[1]!!.replace("-", "")
+                val yerdate = checkLatestArr[0]
+                val ourdate = checkLatestArr[1]
+
+                if(yerdate.toInt() < testingdate.toInt() && (testingdate.toInt() > ourdate.toInt())) {
+                    uiThread {
+                        val testingtxt = findViewById<TextView>(R.id.testing_date_txt)
+
+                        testingtxt.visibility = VISIBLE
+                        testing_button.visibility = VISIBLE
+
+                        testing_button.setOnClickListener {
+                            MaterialDialog(this@ScrollingActivity).show {
+                                icon(R.drawable.ic_warning)
+                                title(text = "Warning!")
+                                message(text = "Testing builds are prone to bugs! Make sure to perform a backup before flashing them. We are not responsible for bricked devices! ")
+                                positiveButton(text = "Download Anyways") {
+                                    val openURL = Intent(android.content.Intent.ACTION_VIEW)
+                                    openURL.data = Uri.parse(testinglink)
+                                    startActivity(openURL)
+                                }
+                                negativeButton(text = "Cancel") { }
+                            }
+                        }
+                        toast("Testing Build Available!")
+                    }
+                }
+            }
+
+            if(checkTestingArr[0] == "not avail" && checkLatestArr[0].toInt() > checkLatestArr[1].toInt()){
+                uiThread {
+                    val testingtxt = findViewById<TextView>(R.id.testing_date_txt)
+
+                    testingtxt.visibility = INVISIBLE
+                    testing_button.visibility = INVISIBLE
+
+                    MaterialDialog(this@ScrollingActivity).show {
+                        icon(R.drawable.ic_checkmark)
+                        title(text = "You are up-to-date!")
+                        negativeButton(text = "Close") { }
+                    }
+                }
+            }
         }
     }
 
@@ -105,8 +166,7 @@ class ScrollingActivity : AppCompatActivity() {
             uiThread {
                 textView.visibility = INVISIBLE
                 progressBar.visibility = VISIBLE
-
-                toast("Fetching link! please wait")
+                toast("Checking for updates!")
             }
 
             val linktext = getDeviceLink().split('/')
@@ -120,7 +180,6 @@ class ScrollingActivity : AppCompatActivity() {
                 textView.textSize = 15f
                 progressBar.visibility = INVISIBLE
                 textView.visibility = VISIBLE
-                toast("Latest zip link fetched!")
             }
         }
     }

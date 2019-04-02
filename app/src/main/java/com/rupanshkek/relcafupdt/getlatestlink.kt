@@ -2,6 +2,7 @@ package com.rupanshkek.relcafupdt
 
 import org.jsoup.Jsoup
 
+
 // fetches latest link from the provided thread
 fun getLatestLink(url: String): String{
     val doc = Jsoup.connect(url).get()
