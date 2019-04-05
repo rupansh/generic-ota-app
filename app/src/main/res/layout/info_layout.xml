@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/device_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="3dp"
+        android:drawableStart="@drawable/ic_device"
+        android:drawablePadding="8dp"
+        android:text="@string/device_title"
+        android:textColor="#000"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/device"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/device_title"
+        android:layout_alignStart="@id/device_title"
+        android:layout_marginStart="5dp"
+        android:text=""
+        android:textColor="@color/md_disabled_text_light_theme"
+        android:textSize="17sp" />
+
+    <TextView
+        android:id="@+id/builddt_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_below="@id/device"
+        android:layout_marginStart="3dp"
+        android:drawableStart="@drawable/ic_calendar"
+        android:drawablePadding="8dp"
+        android:text="@string/buildd_title"
+        android:textColor="#000"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/builddt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/builddt_title"
+        android:layout_alignStart="@id/builddt_title"
+        android:layout_marginStart="5dp"
+        android:text=""
+        android:textColor="@color/md_disabled_text_light_theme"
+        android:textSize="17sp" />
+
+    <TextView
+        android:id="@+id/maintainer_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_below="@id/builddt"
+        android:layout_marginStart="3dp"
+        android:drawableStart="@drawable/ic_maintainer"
+        android:drawablePadding="8dp"
+        android:text="@string/maintainer_title"
+        android:textColor="#000"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/maintainer_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/maintainer_title"
+        android:layout_marginStart="5dp"
+        android:text="@string/maintainer_name"
+        android:textColor="@color/md_disabled_text_light_theme"
+        android:textSize="17sp" />
+
+</RelativeLayout>

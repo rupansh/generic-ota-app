@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/testing_build"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="3dp"
+        android:text=""
+        android:textColor="@color/md_disabled_text_light_theme"
+        android:textSize="12sp" />
+
+    <Button
+        android:id="@+id/testing_button"
+        style="@android:style/Widget.DeviceDefault.Light.Button"
+        android:layout_width="135dp"
+        android:layout_height="40dp"
+        android:layout_below="@id/testing_build"
+        android:backgroundTint="@android:color/holo_orange_dark"
+        android:drawableStart="@drawable/ic_download"
+        android:drawableTint="@android:color/holo_red_dark"
+        android:fontFamily="sans-serif-black"
+        android:text="@string/lat_buttontxt"
+        android:textColor="@android:color/background_light"
+        android:textStyle="italic" />
+
+</RelativeLayout>

@@ -10,17 +10,20 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View.*
 import android.widget.*
-import androidx.core.text.HtmlCompat
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.callbacks.onDismiss
+import com.alespero.expandablecardview.ExpandableCardView
 import com.parse.Parse
 import kotlinx.android.synthetic.main.activity_scrolling.*
 import org.jetbrains.anko.*
+import android.view.animation.AnimationUtils
+import kotlinx.android.synthetic.main.testing_layout.*
 
 
 class ScrollingActivity : AppCompatActivity() {
 
     private var networkAvail = false
+    private var latestLink = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +33,9 @@ class ScrollingActivity : AppCompatActivity() {
             checkNetwork()
 
             if (networkAvail) {
+                val rotateAnim = AnimationUtils.loadAnimation(this, R.anim.rotate)
+                fab.startAnimation(rotateAnim)
+
                 getLink()
                 updateReq()
             } else{
@@ -40,10 +46,10 @@ class ScrollingActivity : AppCompatActivity() {
                     negativeButton(text = "Quit") { finish(); moveTaskToBack(true) }
                     onDismiss { finish(); moveTaskToBack(true) }
                 }
-                val latestziptxt = findViewById<TextView>(R.id.latzip)
-                val textView = findViewById<TextView>(R.id.lat_link)
+                val latestzipcard = findViewById<ExpandableCardView>(R.id.latzip)
+                val textView = findViewById<Button>(R.id.lat_button)
                 textView.visibility = INVISIBLE
-                latestziptxt.visibility = INVISIBLE
+                latestzipcard.visibility = INVISIBLE
             }
         }
 
@@ -79,25 +85,11 @@ class ScrollingActivity : AppCompatActivity() {
             val checkTestingArr = CheckingUpdates.testingInfo
 
             if (checkLatestArr[0].toInt() < checkLatestArr[1].toInt()) {
-                val latestLink = getDeviceLink()
-
                 uiThread {
-                    val yerdatetxt = findViewById<TextView>(R.id.yer_date_txt)
-                    val yerdate = findViewById<TextView>(R.id.yer_date)
-                    val ourdatetxt = findViewById<TextView>(R.id.our_date_txt)
-                    val ourdate = findViewById<TextView>(R.id.our_date)
-
-                    yerdatetxt.visibility = VISIBLE
-                    ourdatetxt.visibility = VISIBLE
-                    yerdate.visibility = VISIBLE
-                    ourdate.visibility = VISIBLE
-                    yerdate.text = checkLatestArr[0]
-                    ourdate.text = checkLatestArr[1]
-
                     MaterialDialog(this@ScrollingActivity).show {
                         icon(R.drawable.ic_update)
                         title(text = "Update available!")
-                        message(text = "Download?")
+                        message(text = "Latest Build: ${checkLatestArr[1]}\nDownload?")
                         positiveButton(text = "Yes") {
                             val openURL = Intent(android.content.Intent.ACTION_VIEW)
                             openURL.data = Uri.parse(latestLink)
@@ -116,10 +108,12 @@ class ScrollingActivity : AppCompatActivity() {
 
                 if(yerdate.toInt() < testingdate.toInt() && (testingdate.toInt() > ourdate.toInt())) {
                     uiThread {
-                        val testingtxt = findViewById<TextView>(R.id.testing_date_txt)
+                        val testingCard = findViewById<ExpandableCardView>(R.id.testingzip)
+                        val testingDate = findViewById<TextView>(R.id.testing_build)
 
-                        testingtxt.visibility = VISIBLE
+                        testingCard.visibility = VISIBLE
                         testing_button.visibility = VISIBLE
+                        testingDate.text = testingdate
 
                         testing_button.setOnClickListener {
                             MaterialDialog(this@ScrollingActivity).show {
@@ -141,9 +135,9 @@ class ScrollingActivity : AppCompatActivity() {
 
             if(checkTestingArr[0] == "not avail" && checkLatestArr[0].toInt() > checkLatestArr[1].toInt()){
                 uiThread {
-                    val testingtxt = findViewById<TextView>(R.id.testing_date_txt)
+                    val testingCard = findViewById<ExpandableCardView>(R.id.testingzip)
 
-                    testingtxt.visibility = INVISIBLE
+                    testingCard.visibility = GONE
                     testing_button.visibility = INVISIBLE
 
                     MaterialDialog(this@ScrollingActivity).show {
@@ -153,6 +147,19 @@ class ScrollingActivity : AppCompatActivity() {
                     }
                 }
             }
+
+            uiThread{
+                val device = findViewById<TextView>(R.id.device)
+                val yerdate = checkLatestArr[0]
+                val buildDate = findViewById<TextView>(R.id.builddt)
+
+                device.text = android.os.Build.DEVICE
+
+                buildDate.text = yerdate
+
+                fab.clearAnimation()
+            }
+
         }
     }
 
@@ -160,26 +167,28 @@ class ScrollingActivity : AppCompatActivity() {
     // Displays latest zip link
     private fun getLink() {
         doAsync {
-            val textView = findViewById<TextView>(R.id.lat_link)
-            val progressBar = findViewById<ProgressBar>(R.id.fetchbar)
+            val latestButton = findViewById<Button>(R.id.lat_button)
 
             uiThread {
-                textView.visibility = INVISIBLE
-                progressBar.visibility = VISIBLE
+                latestButton.visibility = INVISIBLE
                 toast("Checking for updates!")
             }
 
-            val linktext = getDeviceLink().split('/')
-            val link = HtmlCompat.fromHtml(
-                "<a href=${getDeviceLink()}>${linktext[linktext.lastIndex - 1]}</a>",
-                HtmlCompat.FROM_HTML_MODE_COMPACT
-            )
+            latestLink = getDeviceLink()
+            val linktext = latestLink.split('/')
 
             uiThread {
-                textView.text = link
-                textView.textSize = 15f
-                progressBar.visibility = INVISIBLE
-                textView.visibility = VISIBLE
+                val latName = findViewById<TextView>(R.id.lat_name)
+
+                latName.text = linktext[linktext.lastIndex - 1]
+
+                latestButton.visibility = VISIBLE
+
+                latestButton.setOnClickListener{
+                    val openURL = Intent(android.content.Intent.ACTION_VIEW)
+                    openURL.data = Uri.parse(latestLink)
+                    startActivity(openURL)
+                }
             }
         }
     }
