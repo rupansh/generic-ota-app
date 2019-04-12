@@ -50,8 +50,10 @@ class ScrollingActivity : AppCompatActivity() {
                 }
                 val latestzipcard = findViewById<ExpandableCardView>(R.id.latzip)
                 val textView = findViewById<Button>(R.id.lat_button)
+                val romincard = findViewById<ExpandableCardView>(R.id.rominfo)
                 textView.visibility = INVISIBLE
                 latestzipcard.visibility = INVISIBLE
+                romincard.visibility = INVISIBLE
             }
         }
 
