@@ -72,20 +72,6 @@
                 app:title="@string/large_text" />
 
             <com.alespero.expandablecardview.ExpandableCardView
-                android:id="@+id/testingzip"
-                android:layout_width="330dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center|top"
-                android:layout_marginTop="20dp"
-                android:visibility="gone"
-                app:animationDuration="300"
-                app:expandOnClick="true"
-                app:icon="@drawable/ic_zip_holo_red"
-                app:inner_view="@layout/testing_layout"
-                app:startExpanded="false"
-                app:title="@string/testbuild" />
-
-            <com.alespero.expandablecardview.ExpandableCardView
                 android:id="@+id/rominfo"
                 android:layout_width="330dp"
                 android:layout_height="wrap_content"

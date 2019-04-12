@@ -5,19 +5,21 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View.*
-import android.widget.*
+import android.view.View.INVISIBLE
+import android.view.View.VISIBLE
+import android.view.animation.AnimationUtils
+import android.widget.Button
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.callbacks.onDismiss
 import com.alespero.expandablecardview.ExpandableCardView
-import com.parse.Parse
 import kotlinx.android.synthetic.main.activity_scrolling.*
-import org.jetbrains.anko.*
-import android.view.animation.AnimationUtils
-import kotlinx.android.synthetic.main.testing_layout.*
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.toast
+import org.jetbrains.anko.uiThread
 
 
 class ScrollingActivity : AppCompatActivity() {
@@ -53,15 +55,8 @@ class ScrollingActivity : AppCompatActivity() {
             }
         }
 
-        Parse.initialize(
-            Parse.Configuration.Builder(this)
-                .applicationId(getString(R.string.appid))
-                .clientKey(getString(R.string.clientkey))
-                .server("https://parseapi.back4app.com")
-                .build()
-        )
-
         fab.performClick()
+
     }
 
 
@@ -75,17 +70,10 @@ class ScrollingActivity : AppCompatActivity() {
     // Displays Update availability
     private fun updateReq() {
         doAsync {
-            val checkLatestArr = CheckingUpdates.checkLatest()
-            CheckingUpdates.checkTesting()
+            val checkLatestArr = checkLatest()
 
-            while(!CheckingUpdates.isTestingSet){
-                Thread.sleep(500)
-            }
-
-            val checkTestingArr = CheckingUpdates.testingInfo
-
-            if (checkLatestArr[0].toInt() < checkLatestArr[1].toInt()) {
-                uiThread {
+            uiThread {
+                if (checkLatestArr[0].toInt() < checkLatestArr[1].toInt()) {
                     MaterialDialog(this@ScrollingActivity).show {
                         icon(R.drawable.ic_update)
                         title(text = "Update available!")
@@ -98,57 +86,14 @@ class ScrollingActivity : AppCompatActivity() {
                         negativeButton(text = "Cancel") { }
                     }
                 }
-            }
-
-            if(checkTestingArr[0] != "not avail"){
-                val testinglink = checkTestingArr[0]
-                val testingdate = checkTestingArr[1]!!.replace("-", "")
-                val yerdate = checkLatestArr[0]
-                val ourdate = checkLatestArr[1]
-
-                if(yerdate.toInt() < testingdate.toInt() && (testingdate.toInt() > ourdate.toInt())) {
-                    uiThread {
-                        val testingCard = findViewById<ExpandableCardView>(R.id.testingzip)
-                        val testingDate = findViewById<TextView>(R.id.testing_build)
-
-                        testingCard.visibility = VISIBLE
-                        testing_button.visibility = VISIBLE
-                        testingDate.text = testingdate
-
-                        testing_button.setOnClickListener {
-                            MaterialDialog(this@ScrollingActivity).show {
-                                icon(R.drawable.ic_warning)
-                                title(text = "Warning!")
-                                message(text = "Testing builds are prone to bugs! Make sure to perform a backup before flashing them. We are not responsible for bricked devices! ")
-                                positiveButton(text = "Download Anyways") {
-                                    val openURL = Intent(android.content.Intent.ACTION_VIEW)
-                                    openURL.data = Uri.parse(testinglink)
-                                    startActivity(openURL)
-                                }
-                                negativeButton(text = "Cancel") { }
-                            }
-                        }
-                        toast("Testing Build Available!")
-                    }
-                }
-            }
-
-            if(checkTestingArr[0] == "not avail" && checkLatestArr[0].toInt() > checkLatestArr[1].toInt()){
-                uiThread {
-                    val testingCard = findViewById<ExpandableCardView>(R.id.testingzip)
-
-                    testingCard.visibility = GONE
-                    testing_button.visibility = INVISIBLE
-
+                else {
                     MaterialDialog(this@ScrollingActivity).show {
                         icon(R.drawable.ic_checkmark)
                         title(text = "You are up-to-date!")
                         negativeButton(text = "Close") { }
                     }
                 }
-            }
 
-            uiThread{
                 val device = findViewById<TextView>(R.id.device)
                 val yerdate = checkLatestArr[0]
                 val buildDate = findViewById<TextView>(R.id.builddt)
@@ -159,7 +104,6 @@ class ScrollingActivity : AppCompatActivity() {
 
                 fab.clearAnimation()
             }
-
         }
     }
 
