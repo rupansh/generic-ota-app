@@ -83,9 +83,14 @@
                 app:inner_view="@layout/info_layout"
                 app:startExpanded="false"
                 app:title="@string/rom_info" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text=""
+                android:textColor="#000"
+                android:textSize="20sp" />
         </LinearLayout>
-
-
-
     </androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
