@@ -81,7 +81,7 @@ class ScrollingActivity : AppCompatActivity() {
                         title(text = "Update available!")
                         message(text = "Latest Build: ${checkLatestArr[1]}\nDownload?")
                         positiveButton(text = "Yes") {
-                            val openURL = Intent(android.content.Intent.ACTION_VIEW)
+                            val openURL = Intent(Intent.ACTION_VIEW)
                             openURL.data = Uri.parse(latestLink)
                             startActivity(openURL)
                         }
@@ -131,7 +131,7 @@ class ScrollingActivity : AppCompatActivity() {
                 latestButton.visibility = VISIBLE
 
                 latestButton.setOnClickListener{
-                    val openURL = Intent(android.content.Intent.ACTION_VIEW)
+                    val openURL = Intent(Intent.ACTION_VIEW)
                     openURL.data = Uri.parse(latestLink)
                     startActivity(openURL)
                 }
