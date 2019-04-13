@@ -12,5 +12,6 @@
     <string name="buildd_title">"Build"</string>
     <string name="device_title">"Device"</string>
     <string name="maintainer_title">"Maintainer"</string>
+    <string name="xda_title">"Thread"</string>
     <string name="action_settings">Settings</string>
 </resources>

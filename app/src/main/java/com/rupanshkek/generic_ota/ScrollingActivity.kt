@@ -20,6 +20,7 @@ import com.rupanshkek.generic_ota.NetworkingTasks.checkLatest
 import com.rupanshkek.generic_ota.NetworkingTasks.fetchMaintainer
 import com.rupanshkek.generic_ota.NetworkingTasks.getDeviceLink
 import kotlinx.android.synthetic.main.activity_scrolling.*
+import kotlinx.android.synthetic.main.info_layout.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.toast
 import org.jetbrains.anko.uiThread
@@ -115,6 +116,19 @@ class ScrollingActivity : AppCompatActivity() {
                 buildDate.text = yerdate
 
                 maintainer.text = maintainerName
+
+                xda_thread.setOnClickListener {
+                    MaterialDialog(this@ScrollingActivity).show {
+                        title(text = "Are You sure?")
+                        message(text = "This will open a browser window")
+                        positiveButton(text = "Yes") {
+                            val openURL = Intent(Intent.ACTION_VIEW)
+                            openURL.data = Uri.parse(threadlink)
+                            startActivity(openURL)
+                        }
+                        negativeButton(text = "Cancel") { }
+                    }
+                }
 
                 fab.clearAnimation()
             }

@@ -20,8 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/device_title"
-        android:layout_alignStart="@id/device_title"
-        android:layout_marginStart="5dp"
+        android:layout_marginStart="9dp"
         android:text=""
         android:textColor="@color/md_disabled_text_light_theme"
         android:textSize="17sp" />
@@ -45,7 +44,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/builddt_title"
         android:layout_alignStart="@id/builddt_title"
-        android:layout_marginStart="5dp"
+        android:layout_marginStart="3dp"
         android:text=""
         android:textColor="@color/md_disabled_text_light_theme"
         android:textSize="17sp" />
@@ -68,9 +67,33 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/maintainer_title"
-        android:layout_marginStart="5dp"
+        android:layout_marginStart="7dp"
         android:text=""
         android:textColor="@color/md_disabled_text_light_theme"
         android:textSize="17sp" />
+
+    <TextView
+        android:id="@+id/xda_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_below="@id/maintainer_name"
+        android:layout_marginStart="7dp"
+        android:drawableStart="@drawable/ic_xda_logo"
+        android:drawablePadding="6dp"
+        android:text="@string/xda_title"
+        android:textColor="#000"
+        android:textSize="20sp" />
+
+    <Button
+        android:id="@+id/xda_thread"
+        style="@android:style/Widget.DeviceDefault.Light.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/xda_title"
+        android:layout_marginStart="5dp"
+        android:backgroundTint="#B00020"
+        android:drawableStart="@drawable/ic_xda_full"
+        android:textSize="14sp" />
 
 </RelativeLayout>
