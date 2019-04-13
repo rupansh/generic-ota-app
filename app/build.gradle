@@ -7,7 +7,7 @@ apply plugin: 'kotlin-android-extensions'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.rupanshkek.relcafupdt"
+        applicationId "com.rupanshkek.generic_ota"
         minSdkVersion 28
         targetSdkVersion 28
         versionCode 1
