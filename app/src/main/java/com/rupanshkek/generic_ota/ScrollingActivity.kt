@@ -18,6 +18,7 @@ import com.afollestad.materialdialogs.callbacks.onDismiss
 import com.alespero.expandablecardview.ExpandableCardView
 import com.rupanshkek.generic_ota.NetworkingTasks.checkLatest
 import com.rupanshkek.generic_ota.NetworkingTasks.fetchMaintainer
+import com.rupanshkek.generic_ota.NetworkingTasks.fetchTitle
 import com.rupanshkek.generic_ota.NetworkingTasks.getDeviceLink
 import kotlinx.android.synthetic.main.activity_scrolling.*
 import kotlinx.android.synthetic.main.info_layout.*
@@ -157,10 +158,12 @@ class ScrollingActivity : AppCompatActivity() {
                 }
             }
 
+            val romtitle = fetchTitle(threadlink)
+
             uiThread {
                 val latName = findViewById<TextView>(R.id.lat_name)
 
-                latName.text = android.os.Build.DEVICE
+                latName.text = romtitle
 
                 latestButton.visibility = VISIBLE
 

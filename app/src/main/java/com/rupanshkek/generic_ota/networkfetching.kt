@@ -46,6 +46,26 @@ object NetworkingTasks {
 
     // Finds Maintainer
     fun fetchMaintainer(threadlink:String): String{
-        return Jsoup.connect(threadlink).get().select("a.bigfusername.xda-popup-trigger").text().split(" ")[0]
+        val doc = Jsoup.connect(threadlink).get()
+
+        return doc.select("a.bigfusername.xda-popup-trigger").text().split(" ")[0]
+    }
+
+    // Fetches Rom Title from thread
+    fun fetchTitle(threadlink: String): String{
+        val doc = Jsoup.connect(threadlink).get()
+        val title = doc.select("div[id=thread-header-bloglike]").select("h1").text()
+        var romtitle = ""
+
+        for (i in title.split("]")){
+            if (!i.startsWith("[") && i.isNotBlank()){
+                romtitle = i.split("[")[0]
+                if (romtitle.startsWith(" ")){
+                    romtitle = romtitle.trim()
+                }
+            }
+        }
+
+        return romtitle
     }
 }
