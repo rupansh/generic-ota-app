@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Reloaded Caf Updater</string>
+    <string name="app_name">Generic OTA</string>
     <string name="large_text">
         "Latest Zip"
     </string>
@@ -12,6 +12,5 @@
     <string name="buildd_title">"Build"</string>
     <string name="device_title">"Device"</string>
     <string name="maintainer_title">"Maintainer"</string>
-    <string name="maintainer_name">"RiteshSaxena"</string>
     <string name="action_settings">Settings</string>
 </resources>

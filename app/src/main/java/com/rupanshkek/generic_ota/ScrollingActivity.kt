@@ -1,4 +1,4 @@
-package com.rupanshkek.relcafupdt
+package com.rupanshkek.generic_ota
 
 import android.content.Context
 import android.content.Intent
@@ -16,6 +16,9 @@ import androidx.appcompat.app.AppCompatActivity
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.callbacks.onDismiss
 import com.alespero.expandablecardview.ExpandableCardView
+import com.rupanshkek.generic_ota.NetworkingTasks.checkLatest
+import com.rupanshkek.generic_ota.NetworkingTasks.fetchMaintainer
+import com.rupanshkek.generic_ota.NetworkingTasks.getDeviceLink
 import kotlinx.android.synthetic.main.activity_scrolling.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.toast
@@ -25,6 +28,7 @@ import org.jetbrains.anko.uiThread
 class ScrollingActivity : AppCompatActivity() {
 
     private var networkAvail = false
+    private var threadlink = ""
     private var latestLink = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,7 +76,12 @@ class ScrollingActivity : AppCompatActivity() {
     // Displays Update availability
     private fun updateReq() {
         doAsync {
-            val checkLatestArr = checkLatest()
+            while (threadlink == ""){
+                Thread.sleep(50)
+            }
+
+            val checkLatestArr = checkLatest(threadlink)
+            val maintainerName = fetchMaintainer(threadlink)
 
             uiThread {
                 if (checkLatestArr[0].toInt() < checkLatestArr[1].toInt()) {
@@ -99,10 +108,13 @@ class ScrollingActivity : AppCompatActivity() {
                 val device = findViewById<TextView>(R.id.device)
                 val yerdate = checkLatestArr[0]
                 val buildDate = findViewById<TextView>(R.id.builddt)
+                val maintainer = findViewById<TextView>(R.id.maintainer_name)
 
                 device.text = android.os.Build.DEVICE
 
                 buildDate.text = yerdate
+
+                maintainer.text = maintainerName
 
                 fab.clearAnimation()
             }
@@ -120,13 +132,21 @@ class ScrollingActivity : AppCompatActivity() {
                 toast("Checking for updates!")
             }
 
-            latestLink = getDeviceLink()
-            val linktext = latestLink.split('/')
+            val devicesArr = resources.getStringArray(R.array.devicearr)
+            val dlPrefix = resources.getString(R.string.dlprefix)
+
+            for (device in devicesArr){
+                val thrddevarr = device.split("|")
+                if (android.os.Build.DEVICE == thrddevarr[0]){
+                    threadlink = thrddevarr[1]
+                    latestLink = getDeviceLink(threadlink, dlPrefix)
+                }
+            }
 
             uiThread {
                 val latName = findViewById<TextView>(R.id.lat_name)
 
-                latName.text = linktext[linktext.lastIndex - 1]
+                latName.text = android.os.Build.DEVICE
 
                 latestButton.visibility = VISIBLE
 

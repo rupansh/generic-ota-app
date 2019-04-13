@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:padding="20dp">
 
 
@@ -9,7 +9,7 @@
         android:id="@+id/lat_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="3dp"
+        android:layout_marginStart="5dp"
         android:text=""
         android:textColor="@color/md_disabled_text_light_theme"
         android:textSize="12sp" />
@@ -20,6 +20,7 @@
         android:layout_width="135dp"
         android:layout_height="40dp"
         android:layout_below="@id/lat_name"
+        android:layout_marginTop="5dp"
         android:backgroundTint="@color/md_divider_dark_theme"
         android:drawableStart="@drawable/ic_download"
         android:drawableTint="@color/md_divider_light_theme"

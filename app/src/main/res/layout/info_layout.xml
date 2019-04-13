@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:padding="20dp">
 
     <TextView
@@ -69,7 +69,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/maintainer_title"
         android:layout_marginStart="5dp"
-        android:text="@string/maintainer_name"
+        android:text=""
         android:textColor="@color/md_disabled_text_light_theme"
         android:textSize="17sp" />
 
