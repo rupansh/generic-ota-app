@@ -15,9 +15,7 @@ limitations under the License. */
 
 package com.rupanshkek.generic_ota
 
-import android.content.Context
 import android.content.Intent
-import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
@@ -28,10 +26,12 @@ import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.JobIntentService
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.callbacks.onDismiss
 import com.alespero.expandablecardview.ExpandableCardView
 import com.rupanshkek.generic_ota.NetworkingTasks.checkLatest
+import com.rupanshkek.generic_ota.NetworkingTasks.checkNetwork
 import com.rupanshkek.generic_ota.NetworkingTasks.fetchMaintainer
 import com.rupanshkek.generic_ota.NetworkingTasks.fetchTitle
 import com.rupanshkek.generic_ota.NetworkingTasks.getDeviceLink
@@ -47,15 +47,21 @@ class ScrollingActivity : AppCompatActivity() {
     private var networkAvail = false
     private var threadlink = ""
     private var latestLink = ""
+    private var doneNoti = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scrolling)
 
         fab.setOnClickListener {
-            checkNetwork()
+            networkAvail = checkNetwork(this)
 
             if (networkAvail) {
+                if (!doneNoti){
+                    JobIntentService.enqueueWork(this, UpdateNotificationJob::class.java, 1, Intent())
+                    doneNoti = true
+                }
+
                 val rotateAnim = AnimationUtils.loadAnimation(this, R.anim.rotate)
                 fab.startAnimation(rotateAnim)
 
@@ -82,13 +88,6 @@ class ScrollingActivity : AppCompatActivity() {
 
     }
 
-
-    // Checks internet access
-    private fun checkNetwork(){
-        val connected = baseContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val netinfo = connected.activeNetworkInfo
-        networkAvail = netinfo != null && netinfo.isConnected
-    }
 
     // Displays Update availability
     private fun updateReq() {
@@ -190,7 +189,6 @@ class ScrollingActivity : AppCompatActivity() {
             }
         }
     }
-
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
