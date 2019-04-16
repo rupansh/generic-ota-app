@@ -52,5 +52,4 @@ A zero BS OTA app for custom roms which doesn't require system app privellages
 ## TO-DO
 
 - Add Inline Building support with AOSP(Probably with **Android.bp**)
-- Add a **background service** which auto checks for updates every n hours and sends a notification
 - Feel free to make requests **appropriate** for a generic app in my **telegram** ( **@rupansh** )
