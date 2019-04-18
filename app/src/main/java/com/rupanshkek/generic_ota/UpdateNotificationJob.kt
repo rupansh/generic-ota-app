@@ -24,50 +24,55 @@ import androidx.core.app.JobIntentService
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.rupanshkek.generic_ota.NetworkingTasks.checkLatest
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
+import kotlinx.coroutines.*
 
 
 class UpdateNotificationJob : JobIntentService() {
 
+    private val job = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + job)
+
     override fun onHandleWork(intent: Intent) {
         createNotificationChannel()
 
-        doAsync {
-            val devicesArr = resources.getStringArray(R.array.devicearr)
-            var threadlink = ""
+        uiScope.launch {
+            var checkLatestArr = listOf("")
 
-            for (device in devicesArr) {
-                val thrddevarr = device.split("|")
-                if (Build.DEVICE == thrddevarr[0]) {
-                    threadlink = thrddevarr[1]
+            val backtask = async(Dispatchers.Default) {
+                val devicesArr = resources.getStringArray(R.array.devicearr)
+                var threadlink = ""
+
+                for (device in devicesArr) {
+                    val thrddevarr = device.split("|")
+                    if (Build.DEVICE == thrddevarr[0]) {
+                        threadlink = thrddevarr[1]
+                    }
                 }
+
+                checkLatestArr = checkLatest(threadlink)
             }
+            backtask.await()
 
-            val checkLatestArr = checkLatest(threadlink)
-
-            uiThread {
-                if (checkLatestArr[0].toInt() < checkLatestArr[1].toInt()) {
-                    // Create an explicit intent for an Activity in your app
-                    val ourIntent = Intent(this@UpdateNotificationJob, ScrollingActivity::class.java).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    }
-                    val pendingIntent: PendingIntent = PendingIntent.getActivity(this@UpdateNotificationJob, 0, ourIntent, 0)
-
-                    val updateBuilder = NotificationCompat.Builder(this@UpdateNotificationJob, "UPDATER_OTA")
-                        .setSmallIcon(R.drawable.ic_download)
-                        .setContentTitle("Update Available!")
-                        .setContentText("Click to download")
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                        .setContentIntent(pendingIntent)
-                        .setAutoCancel(true)
-
-                    with(NotificationManagerCompat.from(this@UpdateNotificationJob)) {
-                        // notificationId is a unique int for each notification that you must define
-                        notify(0, updateBuilder.build())
-                    }
-
+            if (checkLatestArr[0].toInt() < checkLatestArr[1].toInt()) {
+                // Create an explicit intent for an Activity in your app
+                val ourIntent = Intent(this@UpdateNotificationJob, ScrollingActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 }
+                val pendingIntent: PendingIntent = PendingIntent.getActivity(this@UpdateNotificationJob, 0, ourIntent, 0)
+
+                val updateBuilder = NotificationCompat.Builder(this@UpdateNotificationJob, "UPDATER_OTA")
+                    .setSmallIcon(R.drawable.ic_download)
+                    .setContentTitle("Update Available!")
+                    .setContentText("Click to download")
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setContentIntent(pendingIntent)
+                    .setAutoCancel(true)
+
+                with(NotificationManagerCompat.from(this@UpdateNotificationJob)) {
+                    // notificationId is a unique int for each notification that you must define
+                    notify(0, updateBuilder.build())
+                }
+
             }
         }
     }

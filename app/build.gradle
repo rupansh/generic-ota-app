@@ -34,7 +34,8 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.11.3'
     implementation 'com.afollestad.material-dialogs:core:2.6.0'
     implementation 'com.alespero:expandable-cardview:0.8'
-    implementation "org.jetbrains.anko:anko:0.10.8"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.2.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0-alpha03'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0-alpha03'

@@ -25,6 +25,7 @@ import android.view.View.VISIBLE
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.JobIntentService
 import com.afollestad.materialdialogs.MaterialDialog
@@ -37,21 +38,27 @@ import com.rupanshkek.generic_ota.NetworkingTasks.fetchTitle
 import com.rupanshkek.generic_ota.NetworkingTasks.getDeviceLink
 import kotlinx.android.synthetic.main.activity_scrolling.*
 import kotlinx.android.synthetic.main.info_layout.*
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.toast
-import org.jetbrains.anko.uiThread
+import kotlinx.android.synthetic.main.update_layout.*
+import kotlinx.coroutines.*
+import kotlin.coroutines.CoroutineContext
 
 
-class ScrollingActivity : AppCompatActivity() {
+class ScrollingActivity : AppCompatActivity(), CoroutineScope {
 
     private var networkAvail = false
     private var threadlink = ""
     private var latestLink = ""
     private var doneNoti = false
 
+    private lateinit var mJob: Job
+    override val coroutineContext: CoroutineContext
+        get() = mJob + Dispatchers.Main
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scrolling)
+
+        mJob = Job()
 
         fab.setOnClickListener {
             networkAvail = checkNetwork(this)
@@ -76,9 +83,9 @@ class ScrollingActivity : AppCompatActivity() {
                     onDismiss { finish(); moveTaskToBack(true) }
                 }
                 val latestzipcard = findViewById<ExpandableCardView>(R.id.latzip)
-                val textView = findViewById<Button>(R.id.lat_button)
                 val romincard = findViewById<ExpandableCardView>(R.id.rominfo)
-                textView.visibility = INVISIBLE
+
+                lat_button.visibility = INVISIBLE
                 latestzipcard.visibility = INVISIBLE
                 romincard.visibility = INVISIBLE
             }
@@ -91,101 +98,106 @@ class ScrollingActivity : AppCompatActivity() {
 
     // Displays Update availability
     private fun updateReq() {
-        doAsync {
-            while (threadlink == ""){
-                Thread.sleep(50)
+        launch {
+            lateinit var checkLatestArr: List<String>
+            lateinit var maintainerName: String
+
+            val doNetBack = async(Dispatchers.Default) {
+                while (threadlink == "") {
+                    Thread.sleep(50)
+                }
+
+                checkLatestArr = checkLatest(threadlink)
+                maintainerName = fetchMaintainer(threadlink)
             }
 
-            val checkLatestArr = checkLatest(threadlink)
-            val maintainerName = fetchMaintainer(threadlink)
+            doNetBack.await()
 
-            uiThread {
-                if (checkLatestArr[0].toInt() < checkLatestArr[1].toInt()) {
-                    MaterialDialog(this@ScrollingActivity).show {
-                        icon(R.drawable.ic_update)
-                        title(text = "Update available!")
-                        message(text = "Latest Build: ${checkLatestArr[1]}\nDownload?")
-                        positiveButton(text = "Yes") {
-                            val openURL = Intent(Intent.ACTION_VIEW)
-                            openURL.data = Uri.parse(latestLink)
-                            startActivity(openURL)
-                        }
-                        negativeButton(text = "Cancel") { }
+            if (checkLatestArr[0].toInt() < checkLatestArr[1].toInt()) {
+                MaterialDialog(this@ScrollingActivity).show {
+                    icon(R.drawable.ic_update)
+                    title(text = "Update available!")
+                    message(text = "Latest Build: ${checkLatestArr[1]}\nDownload?")
+                    positiveButton(text = "Yes") {
+                        val openURL = Intent(Intent.ACTION_VIEW)
+                        openURL.data = Uri.parse(latestLink)
+                        startActivity(openURL)
                     }
+                    negativeButton(text = "Cancel") { }
                 }
-                else {
-                    MaterialDialog(this@ScrollingActivity).show {
-                        icon(R.drawable.ic_checkmark)
-                        title(text = "You are up-to-date!")
-                        negativeButton(text = "Close") { }
-                    }
-                }
-
-                val device = findViewById<TextView>(R.id.device)
-                val yerdate = checkLatestArr[0]
-                val buildDate = findViewById<TextView>(R.id.builddt)
-                val maintainer = findViewById<TextView>(R.id.maintainer_name)
-
-                device.text = android.os.Build.DEVICE
-
-                buildDate.text = yerdate
-
-                maintainer.text = maintainerName
-
-                xda_thread.setOnClickListener {
-                    MaterialDialog(this@ScrollingActivity).show {
-                        title(text = "Are You sure?")
-                        message(text = "This will open a browser window")
-                        positiveButton(text = "Yes") {
-                            val openURL = Intent(Intent.ACTION_VIEW)
-                            openURL.data = Uri.parse(threadlink)
-                            startActivity(openURL)
-                        }
-                        negativeButton(text = "Cancel") { }
-                    }
-                }
-
-                fab.clearAnimation()
             }
+            else {
+                MaterialDialog(this@ScrollingActivity).show {
+                    icon(R.drawable.ic_checkmark)
+                    title(text = "You are up-to-date!")
+                    negativeButton(text = "Close") { }
+                }
+            }
+
+            val device = findViewById<TextView>(R.id.device)
+            val yerdate = checkLatestArr[0]
+            val buildDate = findViewById<TextView>(R.id.builddt)
+            val maintainer = findViewById<TextView>(R.id.maintainer_name)
+
+            device.text = android.os.Build.DEVICE
+
+            buildDate.text = yerdate
+
+            maintainer.text = maintainerName
+
+            xda_thread.setOnClickListener {
+                MaterialDialog(this@ScrollingActivity).show {
+                    title(text = "Are You sure?")
+                    message(text = "This will open a browser window")
+                    positiveButton(text = "Yes") {
+                        val openURL = Intent(Intent.ACTION_VIEW)
+                        openURL.data = Uri.parse(threadlink)
+                        startActivity(openURL)
+                    }
+                    negativeButton(text = "Cancel") { }
+                }
+            }
+            fab.clearAnimation()
         }
     }
 
 
     // Displays latest zip link
     private fun getLink() {
-        doAsync {
+        launch {
             val latestButton = findViewById<Button>(R.id.lat_button)
+            latestButton.visibility = INVISIBLE
 
-            uiThread {
-                latestButton.visibility = INVISIBLE
-                toast("Checking for updates!")
+            Toast.makeText(this@ScrollingActivity, "Checking for updates!", Toast.LENGTH_SHORT).show()
+
+            lateinit var romtitle: String
+
+            val doNetBack = async(Dispatchers.Default) {
+                val devicesArr = resources.getStringArray(R.array.devicearr)
+                val dlPrefix = resources.getString(R.string.dlprefix)
+
+                for (device in devicesArr) {
+                    val thrddevarr = device.split("|")
+                    if (android.os.Build.DEVICE == thrddevarr[0]) {
+                        threadlink = thrddevarr[1]
+                        latestLink = getDeviceLink(threadlink, dlPrefix)
+                    }
+                }
+
+                romtitle = fetchTitle(threadlink)
             }
 
-            val devicesArr = resources.getStringArray(R.array.devicearr)
-            val dlPrefix = resources.getString(R.string.dlprefix)
+            doNetBack.await()
 
-            for (device in devicesArr){
-                val thrddevarr = device.split("|")
-                if (android.os.Build.DEVICE == thrddevarr[0]){
-                    threadlink = thrddevarr[1]
-                    latestLink = getDeviceLink(threadlink, dlPrefix)
-                }
-            }
+            val latName = findViewById<TextView>(R.id.lat_name)
+            latName.text = romtitle
 
-            val romtitle = fetchTitle(threadlink)
+            latestButton.visibility = VISIBLE
 
-            uiThread {
-                val latName = findViewById<TextView>(R.id.lat_name)
-
-                latName.text = romtitle
-
-                latestButton.visibility = VISIBLE
-
-                latestButton.setOnClickListener{
-                    val openURL = Intent(Intent.ACTION_VIEW)
-                    openURL.data = Uri.parse(latestLink)
-                    startActivity(openURL)
-                }
+            latestButton.setOnClickListener{
+                val openURL = Intent(Intent.ACTION_VIEW)
+                openURL.data = Uri.parse(latestLink)
+                startActivity(openURL)
             }
         }
     }
@@ -205,5 +217,11 @@ class ScrollingActivity : AppCompatActivity() {
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        mJob.cancel()
     }
 }
