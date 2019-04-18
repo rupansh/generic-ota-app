@@ -4,7 +4,6 @@ A zero BS OTA app for custom roms which doesn't require system app privellages
 
 ## Requirements
 - An Android Studio Environment
-- Basic Kotlin Skills
 - Basic XML Understanding
 - Basic App development experience
 - A brain
@@ -28,6 +27,9 @@ A zero BS OTA app for custom roms which doesn't require system app privellages
     
     In a nutshell, the rom title should be **between []** (It is the default xda thread format that devs use so you probably already do that)
 - Your thread's first post should **only** have **one** link with the download link prefix! Having them on **second/any other** post is just **fine**.
+
+if you find this intimidating, it really isn't. Just look at this thread: https://forum.xda-developers.com/xiaomi-redmi-3s/development/rom-reloaded-caf-t3891208. or https://forum.xda-developers.com/xiaomi-redmi-3s/development/rom-pixel-experience-t3904334
+Both of these threads are mostly ready for the app! (And many more in the Redmi 3s forum itself)
 
 **Some Alternatives to the requirements-**
 
