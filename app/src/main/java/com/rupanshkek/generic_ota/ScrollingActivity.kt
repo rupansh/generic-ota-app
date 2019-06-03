@@ -20,25 +20,22 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View.INVISIBLE
-import android.view.View.VISIBLE
-import android.view.animation.AnimationUtils
+import android.view.View
+import android.view.View.*
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.JobIntentService
+import br.com.simplepass.loadingbutton.customViews.CircularProgressButton
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.callbacks.onDismiss
-import com.alespero.expandablecardview.ExpandableCardView
 import com.rupanshkek.generic_ota.NetworkingTasks.checkLatest
 import com.rupanshkek.generic_ota.NetworkingTasks.checkNetwork
 import com.rupanshkek.generic_ota.NetworkingTasks.fetchMaintainer
 import com.rupanshkek.generic_ota.NetworkingTasks.fetchTitle
 import com.rupanshkek.generic_ota.NetworkingTasks.getDeviceLink
 import kotlinx.android.synthetic.main.activity_scrolling.*
-import kotlinx.android.synthetic.main.info_layout.*
-import kotlinx.android.synthetic.main.update_layout.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
@@ -49,6 +46,7 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
     private var threadlink = ""
     private var latestLink = ""
     private var doneNoti = false
+    private lateinit var fabbut: CircularProgressButton
 
     private lateinit var mJob: Job
     override val coroutineContext: CoroutineContext
@@ -68,9 +66,8 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
                     JobIntentService.enqueueWork(this, UpdateNotificationJob::class.java, 1, Intent())
                     doneNoti = true
                 }
-
-                val rotateAnim = AnimationUtils.loadAnimation(this, R.anim.rotate)
-                fab.startAnimation(rotateAnim)
+                fabbut = findViewById(R.id.fab)
+                fabbut.startAnimation()
 
                 getLink()
                 updateReq()
@@ -82,17 +79,38 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
                     negativeButton(text = "Quit") { finish(); moveTaskToBack(true) }
                     onDismiss { finish(); moveTaskToBack(true) }
                 }
-                val latestzipcard = findViewById<ExpandableCardView>(R.id.latzip)
-                val romincard = findViewById<ExpandableCardView>(R.id.rominfo)
 
                 lat_button.visibility = INVISIBLE
-                latestzipcard.visibility = INVISIBLE
-                romincard.visibility = INVISIBLE
+                lat_zip.visibility = INVISIBLE
+                dev_info.visibility = INVISIBLE
             }
         }
 
         fab.performClick()
 
+    }
+
+    private fun changeCard(id: Int, view: Button, drawable: Int){
+        val card = findViewById<androidx.cardview.widget.CardView>(id)
+        val arrow : Int
+
+        if (card.visibility == GONE){
+            card.visibility = VISIBLE
+            arrow = R.drawable.arrow_up
+        } else {
+            card.visibility = GONE
+            arrow = R.drawable.arrow_down
+        }
+
+        view.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable, 0, arrow, 0)
+    }
+
+    fun showInfo(view: View){
+        changeCard(R.id.rominfo, dev_info, R.drawable.ic_device_color_primary)
+    }
+
+    fun showLatZip(view: View){
+        changeCard(R.id.latestzip, lat_zip, R.drawable.ic_zip)
     }
 
 
@@ -108,7 +126,7 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
                 }
 
                 checkLatestArr = checkLatest(threadlink)
-                maintainerName = fetchMaintainer(threadlink)
+                maintainerName = "Maintainer:  ${fetchMaintainer(threadlink)}"
             }
 
             doNetBack.await()
@@ -134,15 +152,19 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
                 }
             }
 
+
             val device = findViewById<TextView>(R.id.device)
-            val yerdate = checkLatestArr[0]
             val buildDate = findViewById<TextView>(R.id.builddt)
+            val obuildDate = findViewById<TextView>(R.id.build_dt)
             val maintainer = findViewById<TextView>(R.id.maintainer_name)
 
-            device.text = android.os.Build.DEVICE
+            val yerdate = "Current Build:  ${checkLatestArr[0]}"
+            val currDev = "Device:  ${android.os.Build.DEVICE}"
+            val dateText = "Build:  ${checkLatestArr[1]}"
 
-            buildDate.text = yerdate
-
+            buildDate.text = dateText
+            device.text = currDev
+            obuildDate.text = yerdate
             maintainer.text = maintainerName
 
             xda_thread.setOnClickListener {
@@ -157,7 +179,8 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
                     negativeButton(text = "Cancel") { }
                 }
             }
-            fab.clearAnimation()
+
+            fabbut.revertAnimation()
         }
     }
 
@@ -165,7 +188,7 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
     // Displays latest zip link
     private fun getLink() {
         launch {
-            val latestButton = findViewById<Button>(R.id.lat_button)
+            val latestButton = findViewById<TextView>(R.id.lat_button)
             latestButton.visibility = INVISIBLE
 
             Toast.makeText(this@ScrollingActivity, "Checking for updates!", Toast.LENGTH_SHORT).show()
@@ -183,8 +206,7 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
                         latestLink = getDeviceLink(threadlink, dlPrefix)
                     }
                 }
-
-                romtitle = fetchTitle(threadlink)
+                romtitle = "ROM:  ${fetchTitle(threadlink)}"
             }
 
             doNetBack.await()
@@ -223,5 +245,6 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
         super.onDestroy()
 
         mJob.cancel()
+        fabbut.dispose()
     }
 }

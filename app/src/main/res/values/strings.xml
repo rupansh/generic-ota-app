@@ -1,18 +1,16 @@
 <resources>
     <string name="app_name">Generic OTA</string>
     <string name="large_text">
-        "Latest Zip"
+        "    Latest Zip"
     </string>
     <string name="yerbuild">"Your Build:"</string>
     <string name="ourbuild">"Latest Build:"</string>
     <string name="nonet">"Please Turn on Cellular Data/WiFi!"</string>
     <string name="testbuild">"Testing Build"</string>
-    <string name="lat_buttontxt">"Download"</string>
-    <string name="rom_info">"ROM Info"</string>
-    <string name="buildd_title">"Build"</string>
-    <string name="device_title">"Device"</string>
-    <string name="maintainer_title">"Maintainer"</string>
-    <string name="xda_title">"Thread"</string>
+    <string name="lat_buttontxt">"<u>Download</u>"</string>
+    <string name="rom_info">"    ROM Info"</string>
+    <string name="xda_title">"Visit XDA Thread"</string>
     <string name="action_settings">Settings</string>
     <string name="logo_desc">"ROM Logo"</string>
+    <string name="updt_txt">" Check Updates"</string>
 </resources>

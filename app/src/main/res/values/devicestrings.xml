@@ -7,5 +7,5 @@
         <item>land|https://forum.xda-developers.com/xiaomi-redmi-3s/development/rom-reloaded-caf-t3891208</item>
         <item>beryllium|https://forum.xda-developers.com/poco-f1/development/rom-reloaded-caf-t3880429</item>
     </string-array>
-    <string name="dlprefix">https://sourceforge.net</string>
+    <string name="dlprefix">https://reloadedrom.com/device</string>
 </resources>

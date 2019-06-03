@@ -33,7 +33,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.1.0-alpha07'
     implementation 'org.jsoup:jsoup:1.11.3'
     implementation 'com.afollestad.material-dialogs:core:2.6.0'
-    implementation 'com.alespero:expandable-cardview:0.8'
+    implementation 'br.com.simplepass:loading-button-android:2.1.5'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.2.0'
     testImplementation 'junit:junit:4.12'
