@@ -22,7 +22,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.View.*
-import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -90,27 +90,28 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
 
     }
 
-    private fun changeCard(id: Int, view: Button, drawable: Int){
+    private fun changeCard(id: Int, arrow: Int){
         val card = findViewById<androidx.cardview.widget.CardView>(id)
-        val arrow : Int
+        val imgview = findViewById<ImageView>(arrow)
+        val angle: Float
 
         if (card.visibility == GONE){
             card.visibility = VISIBLE
-            arrow = R.drawable.arrow_up
+            angle = 180f
         } else {
             card.visibility = GONE
-            arrow = R.drawable.arrow_down
+            angle = -180f
         }
+        imgview.animate().setDuration(300).rotationBy(angle).start()
 
-        view.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable, 0, arrow, 0)
     }
 
     fun showInfo(view: View){
-        changeCard(R.id.rominfo, dev_info, R.drawable.ic_device_color_primary)
+        changeCard(R.id.rominfo, R.id.dev_info_ar)
     }
 
     fun showLatZip(view: View){
-        changeCard(R.id.latestzip, lat_zip, R.drawable.ic_zip)
+        changeCard(R.id.latestzip, R.id.lat_zip_ar)
     }
 
 

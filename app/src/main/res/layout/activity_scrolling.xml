@@ -65,20 +65,37 @@
             android:orientation="vertical"
             tools:context=".ScrollingActivity">
 
-            <Button
-                android:id="@+id/lat_zip"
-                android:onClick="showLatZip"
-                android:layout_width="300dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center|top"
-                android:background="@drawable/ic_info"
-                android:drawableStart="@drawable/ic_zip"
-                android:drawableEnd="@drawable/arrow_down"
-                android:drawableTint="#FA8E01"
-                android:text="@string/large_text"
-                android:textAlignment="viewStart"
-                android:textColor="#FAFAFA"
-                android:textSize="18sp" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <Button
+                    android:id="@+id/lat_zip"
+                    android:onClick="showLatZip"
+                    android:layout_width="300dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|top"
+                    android:layout_marginStart="55dp"
+                    android:background="@drawable/ic_info"
+                    android:drawableStart="@drawable/ic_zip"
+                    android:drawableTint="#FA8E01"
+                    android:text="@string/large_text"
+                    android:textAlignment="viewStart"
+                    android:textColor="#FAFAFA"
+                    android:textSize="18sp" />
+
+                <ImageView
+                    android:id="@+id/lat_zip_ar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignEnd="@+id/lat_zip"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/arrow_down"
+                    android:tint="#FA8E01"
+                    android:elevation="10dp"
+                    android:contentDescription="@string/arrow"/>
+
+            </RelativeLayout>
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/latestzip"
@@ -131,22 +148,39 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp">
 
-            <Button
-                android:id="@+id/dev_info"
-                android:onClick="showInfo"
-                android:layout_width="300dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:layout_gravity="center|top"
-                android:background="@drawable/ic_info"
-                android:drawableStart="@drawable/ic_device_color_primary"
-                android:drawableEnd="@drawable/arrow_down"
-                android:drawableTint="#FA8E01"
-                android:text="@string/rom_info"
-                android:textAlignment="viewStart"
-                android:textColor="#FAFAFA"
-                android:textSize="18sp" />
+                <Button
+                    android:id="@+id/dev_info"
+                    android:onClick="showInfo"
+                    android:layout_width="300dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|top"
+                    android:layout_marginStart="55dp"
+                    android:background="@drawable/ic_info"
+                    android:drawableStart="@drawable/ic_device_color_primary"
+                    android:drawableTint="#FA8E01"
+                    android:text="@string/rom_info"
+                    android:textAlignment="viewStart"
+                    android:textColor="#FAFAFA"
+                    android:textSize="18sp" />
+
+
+                <ImageView
+                    android:id="@+id/dev_info_ar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignEnd="@+id/dev_info"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/arrow_down"
+                    android:tint="#FA8E01"
+                    android:elevation="10dp"
+                    android:contentDescription="@string/arrow"/>
+
+            </RelativeLayout>
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/rominfo"
