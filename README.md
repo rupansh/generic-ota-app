@@ -15,7 +15,7 @@ A zero BS OTA app for custom roms which doesn't require system app privellages
 `<item>devicecodename|xdathreadlink</item>`
 - Change the dlprefix string to the one which your rom maintainers use for hosting roms. (eg. https://drive.google.com/ . It should pretty much be what your official download urls start with)
 - Rebrand the OTA app for your ROM if you wish to.
-- Navigate to `app/src/main/res/drawable` and remove ic_toast.xml with your ROM's vector logo(Hint- use vector assist). PS:- The logo size should strictly be 430x180dp
+- Navigate to `app/src/main/res/drawable` and remove ic_toast.xml with your ROM's vector logo(Hint- use vector assist).
 
 ## Thread Requirements
 
