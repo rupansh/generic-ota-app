@@ -23,7 +23,7 @@ import android.os.Build
 import androidx.core.app.JobIntentService
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.rupanshkek.generic_ota.NetworkingTasks.checkLatest
+import com.rupanshkek.generic_ota.XDAFetch.checkLatest
 import kotlinx.coroutines.*
 
 
@@ -37,19 +37,36 @@ class UpdateNotificationJob : JobIntentService() {
 
         uiScope.launch {
             var checkLatestArr = listOf("")
+            val fetchMode = resources.getString(R.string.fetchMode)
 
             val backtask = async(Dispatchers.Default) {
-                val devicesArr = resources.getStringArray(R.array.devicearr)
-                var threadlink = ""
-
-                for (device in devicesArr) {
-                    val thrddevarr = device.split("|")
-                    if (Build.DEVICE == thrddevarr[0]) {
-                        threadlink = thrddevarr[1]
+                lateinit var devicesArr: Array<String>
+                if (fetchMode == "xda") {
+                    devicesArr = resources.getStringArray(R.array.devicearr)
+                } else {
+                    JSONFetch.fetchJson(resources.getString(R.string.devicesJSON))
+                    devicesArr = arrayOf()
+                    for (data in JSONFetch.jsonData.orEmpty()){
+                        devicesArr += data.device
                     }
                 }
 
-                checkLatestArr = checkLatest(threadlink)
+                for (device in devicesArr) {
+                    if(fetchMode == "xda") {
+                        val thrddevarr = device.split("|")
+                        if (Build.DEVICE == thrddevarr[0]) {
+                            val threadlink = thrddevarr[1]
+                            checkLatestArr = checkLatest(threadlink)
+                            break
+                        }
+                    } else {
+                        if (Build.DEVICE == device) {
+                            JSONFetch.ourIndex = (devicesArr.indexOf(device))
+                            checkLatestArr = JSONFetch.checkLatest()
+                            break
+                        }
+                    }
+                }
             }
             backtask.await()
 

@@ -10,14 +10,49 @@ A zero BS OTA app for custom roms which doesn't require system app privellages
 
 ## Setting-Up
 
-- Navitgate to `app/src/main/res/values/devicestrings.xml`
-- Remove the items from example devicearr and add items for  the devices your rom supports. The basic format is as follows-
-`<item>devicecodename|xdathreadlink</item>`
-- Change the dlprefix string to the one which your rom maintainers use for hosting roms. (eg. https://drive.google.com/ . It should pretty much be what your official download urls start with)
 - Rebrand the OTA app for your ROM if you wish to.
 - Navigate to `app/src/main/res/drawable` and remove ic_toast.xml with your ROM's vector logo(Hint- use vector assist).
 
-## Thread Requirements
+### For XDA-Fetch Mode (updater fetches all the data from xda thread):
+- Navigate to `app/src/main/res/values/otasettings.xml`
+- Change `fetchMode` to `xda`
+- Navitgate to `app/src/main/res/values/xdadevices.xml`
+- Remove the items from example devicearr and add items for  the devices your rom supports. The basic format is as follows-
+`<item>devicecodename|xdathreadlink</item>`
+- Change the dlprefix string to the one which your rom maintainers use for hosting roms. (eg. https://drive.google.com/ . It should pretty much be what your official download urls start with)
+- Do check thread requirements for thread formatting
+
+### For JSON Fetch Mode(Updater fetches data from a json file):
+- Navigate to `app/src/main/res/values/otasettings.xml`
+- Change `fetchMode` to `json`
+- Navigate to `app/src/main/res/values/jsonurl.xml`
+- Replace the string inside `devicesJSON` with the url of your json file
+- Check JSON Requirements for format!
+
+## JSON Requirements (Only for json fetch mode!)
+- The format of the json file is as follows(Please make sure to properly follow the format)- 
+`[`  
+`    {`  
+`        "device" : "devicecodename1",`  
+`        "download" : "download_link_of_device1",`  
+`        "zip_name" : "name_of_the_zip1",`  
+`        "build_date" : "YYYY-MM-DD",`  
+`        "maintainer" : "maintainer1",`  
+`        "xda_thread" : "link_to_xda_thread1"`  
+`    },`  
+`    {`  
+`        "device" : "devicecodename2",`  
+`        "download" : "download_link_of_device2",`  
+`        "zip_name" : "name_of_the_zip2",`  
+`        "build_date" : "YYYY-MM-DD",`  
+`        "maintainer" : "maintainer2",`  
+`        "xda_thread" : "link_to_xda_thread2"`  
+`    }`  
+`]`  
+- An example json file can be found here- [devices.json](https://gist.githubusercontent.com/rupansh/a9963fd372bb007365370b11e94610b0/raw/f72004278bec97258862e730a1ef0a598cc20341/devices.json)
+- You can add as many devices as you want!
+    
+## Thread Requirements (Only for xda fetch mode!)
 
 - It is **required** that you are posting your roms on **xda-forums**. After all, the app fetches **all the information** from the given xda thread!
 - Your thread's **first** post **must** have a download link to the ROM
@@ -30,14 +65,6 @@ A zero BS OTA app for custom roms which doesn't require system app privellages
 
 if you find this intimidating, it really isn't. Just look at this thread: https://forum.xda-developers.com/xiaomi-redmi-3s/development/rom-reloaded-caf-t3891208. or https://forum.xda-developers.com/xiaomi-redmi-3s/development/rom-pixel-experience-t3904334
 Both of these threads are mostly ready for the app! (And many more in the Redmi 3s forum itself)
-
-**Some Alternatives to the requirements-**
-
-- You can modify the app's **networkfetching** and **ScrollingActivity** to support other forums
-- You can modify the app's **networkfetching** to fetch the link from any post
-- You can modify the app to use parse api or json to get the latest build date in the format. An example using parse can be found in this commit - [https://github.com/rupansh/generic-ota-app/commit/eda9ff99858117c4b920bed266b9b7d4c39e06ab#diff-05efa0086bca94e2fc4da01cf12e3dbeR53](https://github.com/rupansh/generic-ota-app/commit/eda9ff99858117c4b920bed266b9b7d4c39e06ab#diff-05efa0086bca94e2fc4da01cf12e3dbeR53) I haven't used json files but its quite easy to use! The point of this app is to fetch maximum the information from the xda thread itself anyways
-- You can modify the thread title parsing in **networkfetching** but I recommend you to follow the general format instead!
--  You can modify **getDeviceLink()** in **networkfetching** to put all the links starting with the prefix in a list and then return the appropriate link according to the indice
 
 ## Contributing
 

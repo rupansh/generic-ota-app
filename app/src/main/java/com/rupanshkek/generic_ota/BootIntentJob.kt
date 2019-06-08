@@ -18,7 +18,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.JobIntentService.enqueueWork
-import com.rupanshkek.generic_ota.NetworkingTasks.checkNetwork
+import com.rupanshkek.generic_ota.Networking.checkNetwork
 
 
 class BootIntentJob : BroadcastReceiver() {

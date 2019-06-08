@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="devicesJSON">https://gist.githubusercontent.com/rupansh/a9963fd372bb007365370b11e94610b0/raw/f72004278bec97258862e730a1ef0a598cc20341/devices.json</string>
+</resources>

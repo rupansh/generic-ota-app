@@ -11,26 +11,14 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
-
-
 package com.rupanshkek.generic_ota
 
-import android.content.Context
-import android.net.ConnectivityManager
 import org.jsoup.Jsoup
 import java.time.Instant
 import java.time.ZoneId
 
 
-object NetworkingTasks {
-
-    // Checks internet access
-    fun checkNetwork(context: Context): Boolean{
-        val connected = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val netinfo = connected.activeNetworkInfo
-        return (netinfo != null && netinfo.isConnected)
-    }
-
+object XDAFetch {
     // fetches latest link for the detected device
     fun getDeviceLink(threadlink: String, prefix: String): String {
         val doc = Jsoup.connect(threadlink).get().select("div.postbit-content.postbit-content-moderated")

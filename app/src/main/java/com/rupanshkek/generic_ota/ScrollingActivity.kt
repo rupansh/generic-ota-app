@@ -30,11 +30,7 @@ import androidx.core.app.JobIntentService
 import br.com.simplepass.loadingbutton.customViews.CircularProgressButton
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.callbacks.onDismiss
-import com.rupanshkek.generic_ota.NetworkingTasks.checkLatest
-import com.rupanshkek.generic_ota.NetworkingTasks.checkNetwork
-import com.rupanshkek.generic_ota.NetworkingTasks.fetchMaintainer
-import com.rupanshkek.generic_ota.NetworkingTasks.fetchTitle
-import com.rupanshkek.generic_ota.NetworkingTasks.getDeviceLink
+import com.rupanshkek.generic_ota.Networking.checkNetwork
 import kotlinx.android.synthetic.main.activity_scrolling.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
@@ -43,9 +39,10 @@ import kotlin.coroutines.CoroutineContext
 class ScrollingActivity : AppCompatActivity(), CoroutineScope {
 
     private var networkAvail = false
-    private var threadlink = ""
+    private var threadlink: String = ""
     private var latestLink = ""
     private var doneNoti = false
+    private var fetchMode = ""
     private lateinit var fabbut: CircularProgressButton
 
     private lateinit var mJob: Job
@@ -68,6 +65,8 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
                 }
                 fabbut = findViewById(R.id.fab)
                 fabbut.startAnimation()
+
+                fetchMode = resources.getString(R.string.fetchMode)
 
                 getLink()
                 updateReq()
@@ -126,8 +125,13 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
                     Thread.sleep(50)
                 }
 
-                checkLatestArr = checkLatest(threadlink)
-                maintainerName = "Maintainer:  ${fetchMaintainer(threadlink)}"
+                if (fetchMode == "xda") {
+                    checkLatestArr = XDAFetch.checkLatest(threadlink)
+                    maintainerName = "Maintainer:  ${XDAFetch.fetchMaintainer(threadlink)}"
+                }  else{
+                    checkLatestArr = JSONFetch.checkLatest()
+                    maintainerName = "Maintainer:  ${JSONFetch.jsonData!![JSONFetch.ourIndex].maintainer}"
+                }
             }
 
             doNetBack.await()
@@ -185,7 +189,6 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
         }
     }
 
-
     // Displays latest zip link
     private fun getLink() {
         launch {
@@ -197,17 +200,37 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
             lateinit var romtitle: String
 
             val doNetBack = async(Dispatchers.Default) {
-                val devicesArr = resources.getStringArray(R.array.devicearr)
+                lateinit var devicesArr: Array<String>
+                if (fetchMode == "xda") {
+                    devicesArr = resources.getStringArray(R.array.devicearr)
+                } else {
+                    JSONFetch.fetchJson(resources.getString(R.string.devicesJSON))
+                    devicesArr = arrayOf()
+                    for (data in JSONFetch.jsonData.orEmpty()){
+                        devicesArr += data.device
+                    }
+                }
                 val dlPrefix = resources.getString(R.string.dlprefix)
 
                 for (device in devicesArr) {
-                    val thrddevarr = device.split("|")
-                    if (android.os.Build.DEVICE == thrddevarr[0]) {
-                        threadlink = thrddevarr[1]
-                        latestLink = getDeviceLink(threadlink, dlPrefix)
-                    }
+                        if(fetchMode == "xda") {
+                            val thrddevarr = device.split("|")
+                            if (android.os.Build.DEVICE == thrddevarr[0]) {
+                                threadlink = thrddevarr[1]
+                                latestLink = XDAFetch.getDeviceLink(threadlink, dlPrefix)
+                                romtitle = "ROM:  ${XDAFetch.fetchTitle(threadlink)}"
+                                break
+                            }
+                        } else {
+                            if (android.os.Build.DEVICE == device) {
+                                JSONFetch.ourIndex = (devicesArr.indexOf(device))
+                                threadlink = JSONFetch.jsonData!![JSONFetch.ourIndex].xdaThread
+                                latestLink = JSONFetch.jsonData!![JSONFetch.ourIndex].download
+                                romtitle = JSONFetch.jsonData!![JSONFetch.ourIndex].zipName
+                                break
+                            }
+                        }
                 }
-                romtitle = "ROM:  ${fetchTitle(threadlink)}"
             }
 
             doNetBack.await()
@@ -224,6 +247,7 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
             }
         }
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.

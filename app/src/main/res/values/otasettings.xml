@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="fetchMode">json</string> <!-- set this as json or xda -->
+</resources>
