@@ -106,11 +106,11 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
 
     }
 
-    fun showInfo(view: View){
+    fun showInfo(@Suppress("UNUSED_PARAMETER") view: View){
         changeCard(R.id.rominfo, R.id.dev_info_ar)
     }
 
-    fun showLatZip(view: View){
+    fun showLatZip(@Suppress("UNUSED_PARAMETER") view: View){
         changeCard(R.id.latestzip, R.id.lat_zip_ar)
     }
 
