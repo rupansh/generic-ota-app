@@ -121,14 +121,18 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
             lateinit var maintainerName: String
 
             val doNetBack = async(Dispatchers.Default) {
-                while (threadlink == "") {
-                    Thread.sleep(50)
-                }
-
                 if (fetchMode == "xda") {
+                    while (threadlink == "") {
+                        Thread.sleep(50)
+                    }
+
                     checkLatestArr = XDAFetch.checkLatest(threadlink)
                     maintainerName = "Maintainer:  ${XDAFetch.fetchMaintainer(threadlink)}"
                 }  else{
+                    while(JSONFetch.jsonData == null){
+                        Thread.sleep(50)
+                    }
+
                     checkLatestArr = JSONFetch.checkLatest()
                     maintainerName = "Maintainer:  ${JSONFetch.jsonData!![JSONFetch.ourIndex].maintainer}"
                 }
