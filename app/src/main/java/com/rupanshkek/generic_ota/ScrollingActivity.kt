@@ -22,6 +22,9 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.View.*
+import android.view.animation.Animation
+import android.view.animation.LinearInterpolator
+import android.view.animation.RotateAnimation
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -92,17 +95,26 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
     private fun changeCard(id: Int, arrow: Int){
         val card = findViewById<androidx.cardview.widget.CardView>(id)
         val imgview = findViewById<ImageView>(arrow)
-        val angle: Float
+        val fromAngle: Float
+        val toAngle: Float
 
         if (card.visibility == GONE){
             card.visibility = VISIBLE
-            angle = 180f
+            fromAngle = 0f
+            toAngle = 180f
         } else {
             card.visibility = GONE
-            angle = -180f
+            fromAngle = 180f
+            toAngle = 0f
         }
-        imgview.animate().setDuration(300).rotationBy(angle).start()
 
+        val anim = RotateAnimation(fromAngle, toAngle, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f)
+        anim.interpolator = LinearInterpolator()
+        anim.repeatCount = 0
+        anim.duration = 300
+        anim.isFillEnabled = true
+        anim.fillAfter = true
+        imgview.startAnimation(anim)
     }
 
     fun showInfo(@Suppress("UNUSED_PARAMETER") view: View){
