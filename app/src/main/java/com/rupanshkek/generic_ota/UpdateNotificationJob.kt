@@ -23,8 +23,13 @@ import android.os.Build
 import androidx.core.app.JobIntentService
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.rupanshkek.generic_ota.XDAFetch.checkLatest
+import com.rupanshkek.generic_ota.fetch_backends.Fetch
+import com.rupanshkek.generic_ota.fetch_backends.JSONFetch
+import com.rupanshkek.generic_ota.fetch_backends.RomDl
+import com.rupanshkek.generic_ota.fetch_backends.XDAFetch
 import kotlinx.coroutines.*
+import java.security.InvalidParameterException
+import java.time.LocalDate
 
 
 class UpdateNotificationJob : JobIntentService() {
@@ -36,41 +41,20 @@ class UpdateNotificationJob : JobIntentService() {
         createNotificationChannel()
 
         uiScope.launch {
-            var checkLatestArr = listOf("")
-            val fetchMode = resources.getString(R.string.fetchMode)
-
-            val backtask = async(Dispatchers.Default) {
-                lateinit var devicesArr: Array<String>
-                if (fetchMode == "xda") {
-                    devicesArr = resources.getStringArray(R.array.devicearr)
-                } else {
-                    JSONFetch.fetchJson(resources.getString(R.string.devicesJSON))
-                    devicesArr = arrayOf()
-                    for (data in JSONFetch.jsonData.orEmpty()){
-                        devicesArr += data.device
-                    }
-                }
-
-                for (device in devicesArr) {
-                    if(fetchMode == "xda") {
-                        val thrddevarr = device.split("|")
-                        if (Build.DEVICE == thrddevarr[0]) {
-                            val threadlink = thrddevarr[1]
-                            checkLatestArr = checkLatest(threadlink)
-                            break
-                        }
-                    } else {
-                        if (Build.DEVICE == device) {
-                            JSONFetch.ourIndex = (devicesArr.indexOf(device))
-                            checkLatestArr = JSONFetch.checkLatest()
-                            break
-                        }
-                    }
-                }
+            lateinit var romDl: RomDl
+            lateinit var latestRes: Pair<LocalDate, LocalDate>
+            val fetchObject = when(resources.getString(R.string.fetchMode)) {
+                "xda" -> XDAFetch(resources.getString(R.string.dlprefix), resources.getStringArray(R.array.devicearr))
+                "json" -> JSONFetch(resources.getString(R.string.devicesJSON))
+                else -> throw InvalidParameterException("Invalid Fetch Mode")
             }
-            backtask.await()
 
-            if (checkLatestArr[0].toInt() < checkLatestArr[1].toInt()) {
+            withContext(Dispatchers.Default) {
+                romDl = fetchObject.fetchData(Build.DEVICE)!!
+                latestRes = fetchObject.getLatest(romDl)
+            }
+
+            if (latestRes.first < latestRes.second) {
                 // Create an explicit intent for an Activity in your app
                 val ourIntent = Intent(this@UpdateNotificationJob, ScrollingActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

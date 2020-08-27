@@ -34,18 +34,22 @@ import br.com.simplepass.loadingbutton.customViews.CircularProgressButton
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.callbacks.onDismiss
 import com.rupanshkek.generic_ota.Networking.checkNetwork
+import com.rupanshkek.generic_ota.fetch_backends.Fetch
+import com.rupanshkek.generic_ota.fetch_backends.JSONFetch
+import com.rupanshkek.generic_ota.fetch_backends.RomDl
+import com.rupanshkek.generic_ota.fetch_backends.XDAFetch
 import kotlinx.android.synthetic.main.activity_scrolling.*
 import kotlinx.coroutines.*
+import java.security.InvalidParameterException
 import kotlin.coroutines.CoroutineContext
 
 
 class ScrollingActivity : AppCompatActivity(), CoroutineScope {
 
     private var networkAvail = false
-    private var threadlink: String = ""
-    private var latestLink = ""
     private var doneNoti = false
-    private var fetchMode = ""
+    private lateinit var fetchObject: Fetch
+    private lateinit var romDl: RomDl
     private lateinit var fabbut: CircularProgressButton
 
     private lateinit var mJob: Job
@@ -69,11 +73,14 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
                 fabbut = findViewById(R.id.fab)
                 fabbut.startAnimation()
 
-                fetchMode = resources.getString(R.string.fetchMode)
+                fetchObject = when(resources.getString(R.string.fetchMode)) {
+                    "xda" -> XDAFetch(resources.getString(R.string.dlprefix), resources.getStringArray(R.array.devicearr))
+                    "json" -> JSONFetch(resources.getString(R.string.devicesJSON))
+                    else -> throw InvalidParameterException("Invalid Fetch Mode")
+                }
 
-                getLink()
-                updateReq()
-            } else{
+                checkUpdate()
+            } else {
                 MaterialDialog(this@ScrollingActivity).show {
                     icon(R.drawable.ic_no_wifi)
                     title(text = "No Internet Access")
@@ -125,47 +132,44 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
         changeCard(R.id.latestzip, R.id.lat_zip_ar)
     }
 
-
-    // Displays Update availability
-    private fun updateReq() {
+    // Displays latest zip link
+    private fun checkUpdate() {
         launch {
-            lateinit var checkLatestArr: List<String>
-            lateinit var maintainerName: String
+            val latestButton = findViewById<TextView>(R.id.lat_button)
+            latestButton.visibility = INVISIBLE
 
-            val doNetBack = async(Dispatchers.Default) {
-                if (fetchMode == "xda") {
-                    while (threadlink == "") {
-                        Thread.sleep(50)
-                    }
+            Toast.makeText(this@ScrollingActivity, "Checking for updates!", Toast.LENGTH_SHORT).show()
 
-                    checkLatestArr = XDAFetch.checkLatest(threadlink)
-                    maintainerName = "Maintainer:  ${XDAFetch.fetchMaintainer(threadlink)}"
-                }  else{
-                    while(JSONFetch.jsonData == null){
-                        Thread.sleep(50)
-                    }
-
-                    checkLatestArr = JSONFetch.checkLatest()
-                    maintainerName = "Maintainer:  ${JSONFetch.jsonData!![JSONFetch.ourIndex].maintainer}"
-                }
+            romDl = withContext(Dispatchers.Default) {
+                fetchObject.fetchData(android.os.Build.DEVICE)!!
             }
 
-            doNetBack.await()
+            val latName = findViewById<TextView>(R.id.lat_name)
+            latName.text = romDl.zipName
 
-            if (checkLatestArr[0].toInt() < checkLatestArr[1].toInt()) {
+            latestButton.visibility = VISIBLE
+
+            latestButton.setOnClickListener{
+                val openURL = Intent(Intent.ACTION_VIEW)
+                openURL.data = Uri.parse(romDl.download)
+                startActivity(openURL)
+            }
+
+            val latestRes = fetchObject.getLatest(romDl)
+
+            if (latestRes.first < latestRes.second) {
                 MaterialDialog(this@ScrollingActivity).show {
                     icon(R.drawable.ic_update)
                     title(text = "Update available!")
-                    message(text = "Latest Build: ${checkLatestArr[1]}\nDownload?")
+                    message(text = "Latest Build: ${latestRes.second}\nDownload?")
                     positiveButton(text = "Yes") {
                         val openURL = Intent(Intent.ACTION_VIEW)
-                        openURL.data = Uri.parse(latestLink)
+                        openURL.data = Uri.parse(romDl.download)
                         startActivity(openURL)
                     }
                     negativeButton(text = "Cancel") { }
                 }
-            }
-            else {
+            } else {
                 MaterialDialog(this@ScrollingActivity).show {
                     icon(R.drawable.ic_checkmark)
                     title(text = "You are up-to-date!")
@@ -179,14 +183,14 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
             val obuildDate = findViewById<TextView>(R.id.build_dt)
             val maintainer = findViewById<TextView>(R.id.maintainer_name)
 
-            val yerdate = "Current Build:  ${checkLatestArr[0]}"
+            val yerdate = "Current Build:  ${latestRes.first}"
             val currDev = "Device:  ${android.os.Build.DEVICE}"
-            val dateText = "Build:  ${checkLatestArr[1]}"
+            val dateText = "Build:  ${latestRes.second}"
 
             buildDate.text = dateText
             device.text = currDev
             obuildDate.text = yerdate
-            maintainer.text = maintainerName
+            maintainer.text = romDl.maintainer
 
             xda_thread.setOnClickListener {
                 MaterialDialog(this@ScrollingActivity).show {
@@ -194,7 +198,7 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
                     message(text = "This will open a browser window")
                     positiveButton(text = "Yes") {
                         val openURL = Intent(Intent.ACTION_VIEW)
-                        openURL.data = Uri.parse(threadlink)
+                        openURL.data = Uri.parse(romDl.xdaThread)
                         startActivity(openURL)
                     }
                     negativeButton(text = "Cancel") { }
@@ -202,65 +206,6 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
             }
 
             fabbut.revertAnimation()
-        }
-    }
-
-    // Displays latest zip link
-    private fun getLink() {
-        launch {
-            val latestButton = findViewById<TextView>(R.id.lat_button)
-            latestButton.visibility = INVISIBLE
-
-            Toast.makeText(this@ScrollingActivity, "Checking for updates!", Toast.LENGTH_SHORT).show()
-
-            lateinit var romtitle: String
-
-            val doNetBack = async(Dispatchers.Default) {
-                lateinit var devicesArr: Array<String>
-                if (fetchMode == "xda") {
-                    devicesArr = resources.getStringArray(R.array.devicearr)
-                } else {
-                    JSONFetch.fetchJson(resources.getString(R.string.devicesJSON))
-                    devicesArr = arrayOf()
-                    for (data in JSONFetch.jsonData.orEmpty()){
-                        devicesArr += data.device
-                    }
-                }
-                val dlPrefix = resources.getString(R.string.dlprefix)
-
-                for (device in devicesArr) {
-                        if(fetchMode == "xda") {
-                            val thrddevarr = device.split("|")
-                            if (android.os.Build.DEVICE == thrddevarr[0]) {
-                                threadlink = thrddevarr[1]
-                                latestLink = XDAFetch.getDeviceLink(threadlink, dlPrefix)
-                                romtitle = "ROM:  ${XDAFetch.fetchTitle(threadlink)}"
-                                break
-                            }
-                        } else {
-                            if (android.os.Build.DEVICE == device) {
-                                JSONFetch.ourIndex = (devicesArr.indexOf(device))
-                                threadlink = JSONFetch.jsonData!![JSONFetch.ourIndex].xdaThread
-                                latestLink = JSONFetch.jsonData!![JSONFetch.ourIndex].download
-                                romtitle = JSONFetch.jsonData!![JSONFetch.ourIndex].zipName
-                                break
-                            }
-                        }
-                }
-            }
-
-            doNetBack.await()
-
-            val latName = findViewById<TextView>(R.id.lat_name)
-            latName.text = romtitle
-
-            latestButton.visibility = VISIBLE
-
-            latestButton.setOnClickListener{
-                val openURL = Intent(Intent.ACTION_VIEW)
-                openURL.data = Uri.parse(latestLink)
-                startActivity(openURL)
-            }
         }
     }
 
