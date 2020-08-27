@@ -160,13 +160,9 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
             val obuildDate = findViewById<TextView>(R.id.build_dt)
             val maintainer = findViewById<TextView>(R.id.maintainer_name)
 
-            val yerdate = "Current Build:  ${latestRes.first}"
-            val currDev = "Device:  ${android.os.Build.DEVICE}"
-            val dateText = "Build:  ${latestRes.second}"
-
-            buildDate.text = dateText
-            device.text = currDev
-            obuildDate.text = yerdate
+            buildDate.text = resources.getString(R.string.devbuild).format(latestRes.second)
+            device.text = resources.getString(R.string.device).format(android.os.Build.DEVICE)
+            obuildDate.text = resources.getString(R.string.curbuild).format(latestRes.first)
             maintainer.text = romDl.maintainer
 
             xda_thread.setOnClickListener {

@@ -14,4 +14,7 @@
     <string name="logo_desc">"ROM Logo"</string>
     <string name="updt_txt">" Check Updates"</string>
     <string name="arrow">"Arrow Img View"</string>
+    <string name="curbuild">Current Build:  %1$s</string>
+    <string name="device">Device:  %1$s</string>
+    <string name="devbuild">Build:  %1$s</string>
 </resources>
