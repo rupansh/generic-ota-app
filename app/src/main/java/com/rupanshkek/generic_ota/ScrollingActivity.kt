@@ -49,7 +49,6 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
     private var networkAvail = false
     private var doneNoti = false
     private lateinit var fetchObject: Fetch
-    private lateinit var romDl: RomDl
     private lateinit var fabbut: CircularProgressButton
 
     private lateinit var mJob: Job
@@ -132,7 +131,7 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
         changeCard(R.id.latestzip, R.id.lat_zip_ar)
     }
 
-    // Displays latest zip link
+    // Checks for an update
     private fun checkUpdate() {
         launch {
             val latestButton = findViewById<TextView>(R.id.lat_button)
@@ -140,9 +139,10 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
 
             Toast.makeText(this@ScrollingActivity, "Checking for updates!", Toast.LENGTH_SHORT).show()
 
-            romDl = withContext(Dispatchers.Default) {
+            val romDl = withContext(Dispatchers.Default) {
                 fetchObject.fetchData(android.os.Build.DEVICE)!!
             }
+            val latestRes = fetchObject.getLatest(romDl)
 
             val latName = findViewById<TextView>(R.id.lat_name)
             latName.text = romDl.zipName
@@ -154,29 +154,6 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
                 openURL.data = Uri.parse(romDl.download)
                 startActivity(openURL)
             }
-
-            val latestRes = fetchObject.getLatest(romDl)
-
-            if (latestRes.first < latestRes.second) {
-                MaterialDialog(this@ScrollingActivity).show {
-                    icon(R.drawable.ic_update)
-                    title(text = "Update available!")
-                    message(text = "Latest Build: ${latestRes.second}\nDownload?")
-                    positiveButton(text = "Yes") {
-                        val openURL = Intent(Intent.ACTION_VIEW)
-                        openURL.data = Uri.parse(romDl.download)
-                        startActivity(openURL)
-                    }
-                    negativeButton(text = "Cancel") { }
-                }
-            } else {
-                MaterialDialog(this@ScrollingActivity).show {
-                    icon(R.drawable.ic_checkmark)
-                    title(text = "You are up-to-date!")
-                    negativeButton(text = "Close") { }
-                }
-            }
-
 
             val device = findViewById<TextView>(R.id.device)
             val buildDate = findViewById<TextView>(R.id.builddt)
@@ -206,6 +183,26 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
             }
 
             fabbut.revertAnimation()
+
+            if (latestRes.first < latestRes.second) {
+                MaterialDialog(this@ScrollingActivity).show {
+                    icon(R.drawable.ic_update)
+                    title(text = "Update available!")
+                    message(text = "Latest Build: ${latestRes.second}\nDownload?")
+                    positiveButton(text = "Yes") {
+                        val openURL = Intent(Intent.ACTION_VIEW)
+                        openURL.data = Uri.parse(romDl.download)
+                        startActivity(openURL)
+                    }
+                    negativeButton(text = "Cancel") { }
+                }
+            } else {
+                MaterialDialog(this@ScrollingActivity).show {
+                    icon(R.drawable.ic_checkmark)
+                    title(text = "You are up-to-date!")
+                    negativeButton(text = "Close") { }
+                }
+            }
         }
     }
 
