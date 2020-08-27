@@ -18,6 +18,7 @@ package com.rupanshkek.generic_ota
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -45,10 +46,7 @@ import kotlin.coroutines.CoroutineContext
 
 
 class ScrollingActivity : AppCompatActivity(), CoroutineScope {
-
-    private var networkAvail = false
     private var doneNoti = false
-    private lateinit var fetchObject: Fetch
     private lateinit var fabbut: CircularProgressButton
 
     private lateinit var mJob: Job
@@ -58,27 +56,25 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scrolling)
-
         mJob = Job()
+        val fetchObject = when(resources.getString(R.string.fetchMode)) {
+            "xda" -> XDAFetch(resources.getString(R.string.dlprefix), resources.getStringArray(R.array.devicearr))
+            "json" -> JSONFetch(resources.getString(R.string.devicesJSON))
+            else -> throw InvalidParameterException("Invalid Fetch Mode")
+        }
+        fabbut = findViewById(R.id.fab)
 
         fab.setOnClickListener {
-            networkAvail = checkNetwork(this)
+            val networkAvail = checkNetwork(this)
 
             if (networkAvail) {
                 if (!doneNoti){
                     JobIntentService.enqueueWork(this, UpdateNotificationJob::class.java, 1, Intent())
                     doneNoti = true
                 }
-                fabbut = findViewById(R.id.fab)
                 fabbut.startAnimation()
 
-                fetchObject = when(resources.getString(R.string.fetchMode)) {
-                    "xda" -> XDAFetch(resources.getString(R.string.dlprefix), resources.getStringArray(R.array.devicearr))
-                    "json" -> JSONFetch(resources.getString(R.string.devicesJSON))
-                    else -> throw InvalidParameterException("Invalid Fetch Mode")
-                }
-
-                checkUpdate()
+                checkUpdate(fetchObject)
             } else {
                 MaterialDialog(this@ScrollingActivity).show {
                     icon(R.drawable.ic_no_wifi)
@@ -132,7 +128,7 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
     }
 
     // Checks for an update
-    private fun checkUpdate() {
+    private fun checkUpdate(fetchObject: Fetch) {
         launch {
             val latestButton = findViewById<TextView>(R.id.lat_button)
             latestButton.visibility = INVISIBLE
@@ -199,6 +195,8 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
                     negativeButton(text = "Close") { }
                 }
             }
+
+            return@launch
         }
     }
 
