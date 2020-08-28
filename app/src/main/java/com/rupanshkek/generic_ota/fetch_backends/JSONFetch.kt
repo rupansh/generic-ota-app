@@ -1,12 +1,12 @@
 package com.rupanshkek.generic_ota.fetch_backends
 
-import com.squareup.moshi.*
-import org.jsoup.Jsoup
-import com.squareup.moshi.Types.newParameterizedType
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
-import java.time.Instant
+import com.squareup.moshi.JsonClass
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types.newParameterizedType
+import org.jsoup.Jsoup
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 
@@ -31,13 +31,10 @@ class JSONFetch(private val jsonDataLink: String): Fetch {
         val adapter: JsonAdapter<List<JRomDl>> = moshi.adapter(devicesType)
 
         val jsonData = adapter.fromJson(fetchedJson)
+        val ourDev = jsonData.orEmpty().singleOrNull {
+            it.device == device
+        }?: return null
 
-        for (it in jsonData.orEmpty()) {
-            if (it.device == device) {
-                return RomDl(it.device, it.download, it.zipName, LocalDate.parse(it.buildDate, dateTimeFormatter), it.maintainer, it.xdaThread)
-            }
-        }
-
-        return null
+        return RomDl(ourDev.device, ourDev.download, ourDev.zipName, LocalDate.parse(ourDev.buildDate, dateTimeFormatter), ourDev.maintainer, ourDev.xdaThread)
     }
 }

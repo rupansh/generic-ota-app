@@ -23,13 +23,10 @@ import android.os.Build
 import androidx.core.app.JobIntentService
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.rupanshkek.generic_ota.fetch_backends.Fetch
 import com.rupanshkek.generic_ota.fetch_backends.JSONFetch
-import com.rupanshkek.generic_ota.fetch_backends.RomDl
 import com.rupanshkek.generic_ota.fetch_backends.XDAFetch
 import kotlinx.coroutines.*
 import java.security.InvalidParameterException
-import java.time.LocalDate
 
 
 class UpdateNotificationJob : JobIntentService() {
@@ -41,18 +38,16 @@ class UpdateNotificationJob : JobIntentService() {
         createNotificationChannel()
 
         uiScope.launch {
-            lateinit var romDl: RomDl
-            lateinit var latestRes: Pair<LocalDate, LocalDate>
             val fetchObject = when(resources.getString(R.string.fetchMode)) {
                 "xda" -> XDAFetch(resources.getString(R.string.dlprefix), resources.getStringArray(R.array.devicearr))
                 "json" -> JSONFetch(resources.getString(R.string.devicesJSON))
                 else -> throw InvalidParameterException("Invalid Fetch Mode")
             }
 
-            withContext(Dispatchers.Default) {
-                romDl = fetchObject.fetchData(Build.DEVICE)!!
-                latestRes = fetchObject.getLatest(romDl)
-            }
+            val romDl = withContext(Dispatchers.Default) {
+                fetchObject.fetchData(Build.DEVICE)
+            }?: return@launch
+            val latestRes = fetchObject.getLatest(romDl)
 
             if (latestRes.first < latestRes.second) {
                 // Create an explicit intent for an Activity in your app

@@ -15,9 +15,7 @@ package com.rupanshkek.generic_ota.fetch_backends
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 
@@ -29,31 +27,17 @@ class XDAFetch(private val prefix: String, private val devicesArr: Array<String>
     private fun fetchDeviceLink(): String {
         val doc = threadDoc.select("div.postbit-content.postbit-content-moderated")
         val links = doc.select("a[href]")
-        var dllink = ""
 
-        for (link in links) {
-            if (link.attr("href").startsWith(prefix)) {
-                dllink = link.attr("href")
-            }
-        }
-
-        return dllink
+        return links.single { it.attr("href").startsWith(prefix) }.attr("href")
     }
 
     // Fetches build date
     private fun fetchBuildDate(): LocalDate {
-        var latestBuildDate = ""
         val doc = threadDoc.select("div.postbit-content.postbit-content-moderated")
-
         val blist = doc.select("b")
+        val latestBuild = blist.single { it.text() == "Last Updated" }.nextSibling().toString().split(" ")[1]
 
-        for (i in blist) {
-            if (i.text() == "Last Updated"){
-                latestBuildDate = i.nextSibling().toString().split(" ")[1]
-            }
-        }
-
-        return LocalDate.parse(latestBuildDate, dateTimeFormatter)
+        return LocalDate.parse(latestBuild,  dateTimeFormatter)
     }
 
     // Finds Maintainer
@@ -64,30 +48,14 @@ class XDAFetch(private val prefix: String, private val devicesArr: Array<String>
     // Fetches Rom Title from thread
     private fun fetchTitle(): String {
         val title = threadDoc.select("div[id=thread-header-bloglike]").select("h1").text()
-        var romtitle = ""
 
-        for (i in title.split("]")){
-            if (!i.startsWith("[") && i.isNotBlank()){
-                romtitle = i.split("[")[0]
-                if (romtitle.startsWith(" ")){
-                    romtitle = romtitle.trim()
-                }
-            }
-        }
-
-        return romtitle
+        return title.split("]").single { !it.startsWith("[") && it.isNotBlank() }.split("[")[0].trim()
     }
 
-    // reqData is dl link prefix
     override fun fetchData(device: String): RomDl? {
-        for (xdev in devicesArr) {
-            val thrddevarr = xdev.split("|")
-            if (thrddevarr[0] == device) {
-                threadDoc = Jsoup.connect(thrddevarr[1]).get()
-                return RomDl(device, fetchDeviceLink(), "ROM:  ${fetchTitle()}", fetchBuildDate(), fetchMaintainer(), thrddevarr[1])
-            }
-        }
+        val deviceThread = devicesArr.singleOrNull { it.split("|")[0] == device }?.split("|")?.get(1)?: return null
 
-        return null
+        threadDoc = Jsoup.connect(deviceThread).get()
+        return RomDl(device, fetchDeviceLink(), "ROM:  ${fetchTitle()}", fetchBuildDate(), fetchMaintainer(), deviceThread)
     }
 }

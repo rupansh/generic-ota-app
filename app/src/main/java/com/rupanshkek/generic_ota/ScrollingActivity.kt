@@ -18,7 +18,6 @@ package com.rupanshkek.generic_ota
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -37,7 +36,6 @@ import com.afollestad.materialdialogs.callbacks.onDismiss
 import com.rupanshkek.generic_ota.Networking.checkNetwork
 import com.rupanshkek.generic_ota.fetch_backends.Fetch
 import com.rupanshkek.generic_ota.fetch_backends.JSONFetch
-import com.rupanshkek.generic_ota.fetch_backends.RomDl
 import com.rupanshkek.generic_ota.fetch_backends.XDAFetch
 import kotlinx.android.synthetic.main.activity_scrolling.*
 import kotlinx.coroutines.*
@@ -62,20 +60,15 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
             "json" -> JSONFetch(resources.getString(R.string.devicesJSON))
             else -> throw InvalidParameterException("Invalid Fetch Mode")
         }
+        val updateExceptionHandler = CoroutineExceptionHandler { _, e ->
+            when (e) {
+                is InvalidDeviceException -> invalidDeviceDialog()
+            }
+        }
         fabbut = findViewById(R.id.fab)
 
         fab.setOnClickListener {
-            val networkAvail = checkNetwork(this)
-
-            if (networkAvail) {
-                if (!doneNoti){
-                    JobIntentService.enqueueWork(this, UpdateNotificationJob::class.java, 1, Intent())
-                    doneNoti = true
-                }
-                fabbut.startAnimation()
-
-                checkUpdate(fetchObject)
-            } else {
+            if (!checkNetwork(this)) {
                 MaterialDialog(this@ScrollingActivity).show {
                     icon(R.drawable.ic_no_wifi)
                     title(text = "No Internet Access")
@@ -88,6 +81,15 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
                 lat_zip.visibility = INVISIBLE
                 dev_info.visibility = INVISIBLE
             }
+
+            fabbut.startAnimation()
+            Toast.makeText(this@ScrollingActivity, "Checking for updates!", Toast.LENGTH_SHORT).show()
+            checkUpdate(fetchObject, updateExceptionHandler)
+
+            if (!doneNoti) {
+                JobIntentService.enqueueWork(this, UpdateNotificationJob::class.java, 1, Intent())
+                doneNoti = true
+            }
         }
 
         fab.performClick()
@@ -98,19 +100,16 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
         val card = findViewById<androidx.cardview.widget.CardView>(id)
         val imgview = findViewById<ImageView>(arrow)
         val fromAngle: Float
-        val toAngle: Float
 
         if (card.visibility == GONE){
             card.visibility = VISIBLE
             fromAngle = 0f
-            toAngle = 180f
         } else {
             card.visibility = GONE
             fromAngle = 180f
-            toAngle = 0f
         }
 
-        val anim = RotateAnimation(fromAngle, toAngle, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f)
+        val anim = RotateAnimation(fromAngle, -(fromAngle-180), Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f)
         anim.interpolator = LinearInterpolator()
         anim.repeatCount = 0
         anim.duration = 300
@@ -128,34 +127,29 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
     }
 
     // Checks for an update
-    private fun checkUpdate(fetchObject: Fetch) {
-        launch {
+    private fun checkUpdate(fetchObject: Fetch, exceptionHandler: CoroutineExceptionHandler) {
+        launch(exceptionHandler) {
             val latestButton = findViewById<TextView>(R.id.lat_button)
             latestButton.visibility = INVISIBLE
-
-            Toast.makeText(this@ScrollingActivity, "Checking for updates!", Toast.LENGTH_SHORT).show()
+            val latName = findViewById<TextView>(R.id.lat_name)
+            val device = findViewById<TextView>(R.id.device)
+            val buildDate = findViewById<TextView>(R.id.builddt)
+            val obuildDate = findViewById<TextView>(R.id.build_dt)
+            val maintainer = findViewById<TextView>(R.id.maintainer_name)
 
             val romDl = withContext(Dispatchers.Default) {
-                fetchObject.fetchData(android.os.Build.DEVICE)!!
-            }
+                fetchObject.fetchData(android.os.Build.DEVICE)
+            }?: throw InvalidDeviceException("Device Not Found!")
             val latestRes = fetchObject.getLatest(romDl)
 
-            val latName = findViewById<TextView>(R.id.lat_name)
-            latName.text = romDl.zipName
-
             latestButton.visibility = VISIBLE
-
             latestButton.setOnClickListener{
                 val openURL = Intent(Intent.ACTION_VIEW)
                 openURL.data = Uri.parse(romDl.download)
                 startActivity(openURL)
             }
 
-            val device = findViewById<TextView>(R.id.device)
-            val buildDate = findViewById<TextView>(R.id.builddt)
-            val obuildDate = findViewById<TextView>(R.id.build_dt)
-            val maintainer = findViewById<TextView>(R.id.maintainer_name)
-
+            latName.text = romDl.zipName
             buildDate.text = resources.getString(R.string.devbuild).format(latestRes.second)
             device.text = resources.getString(R.string.device).format(android.os.Build.DEVICE)
             obuildDate.text = resources.getString(R.string.curbuild).format(latestRes.first)
@@ -173,8 +167,6 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
                     negativeButton(text = "Cancel") { }
                 }
             }
-
-            fabbut.revertAnimation()
 
             if (latestRes.first < latestRes.second) {
                 MaterialDialog(this@ScrollingActivity).show {
@@ -196,10 +188,19 @@ class ScrollingActivity : AppCompatActivity(), CoroutineScope {
                 }
             }
 
-            return@launch
+            fabbut.revertAnimation()
         }
     }
 
+    private fun invalidDeviceDialog() {
+        MaterialDialog(this).show {
+            icon(R.drawable.ic_warning)
+            title(text = "Invalid Device")
+            message(text = "Your Device is not supported!")
+            negativeButton(text = "Quit") { finish(); moveTaskToBack(true) }
+            onDismiss { finish(); moveTaskToBack(true) }
+        }
+    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
