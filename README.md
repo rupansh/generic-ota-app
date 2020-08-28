@@ -1,6 +1,8 @@
 # generic-ota-app
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue?style=for-the-badge&logo=apache)](https://www.gnu.org/licenses/gpl-3.0)
+[![KOTLIN](https://img.shields.io/badge/made%20with-kotlin-red.svg?style=for-the-badge&logo=kotlin)](https://kotlinlang.org/)
 
-A zero BS OTA app for custom roms which doesn't require system app privellages
+*A zero BS OTA app for custom roms which doesn't require system app privileges*
 
 ## Requirements
 - An Android Studio Environment
@@ -31,24 +33,27 @@ A zero BS OTA app for custom roms which doesn't require system app privellages
 
 ## JSON Requirements (Only for json fetch mode!)
 - The format of the json file is as follows(Please make sure to properly follow the format)- 
-`[`  
-`    {`  
-`        "device" : "devicecodename1",`  
-`        "download" : "download_link_of_device1",`  
-`        "zip_name" : "name_of_the_zip1",`  
-`        "build_date" : "YYYY-MM-DD",`  
-`        "maintainer" : "maintainer1",`  
-`        "xda_thread" : "link_to_xda_thread1"`  
-`    },`  
-`    {`  
-`        "device" : "devicecodename2",`  
-`        "download" : "download_link_of_device2",`  
-`        "zip_name" : "name_of_the_zip2",`  
-`        "build_date" : "YYYY-MM-DD",`  
-`        "maintainer" : "maintainer2",`  
-`        "xda_thread" : "link_to_xda_thread2"`  
-`    }`  
-`]`  
+```
+[
+    {
+        "device" : "devicecodename1",
+        "download" : "download_link_of_device1",
+        "zip_name" : "name_of_the_zip1",
+        "build_date" : "YYYY-MM-DD",
+        "maintainer" : "maintainer1",
+        "xda_thread" : "link_to_xda_thread1"
+    },
+    {
+        "device" : "devicecodename2",
+        "download" : "download_link_of_device2",
+        "zip_name" : "name_of_the_zip2",
+        "build_date" : "YYYY-MM-DD",
+        "maintainer" : "maintainer2",
+        "xda_thread" : "link_to_xda_thread2"
+    }
+]
+```
+
 - An example json file can be found here- [devices.json](https://gist.githubusercontent.com/rupansh/a9963fd372bb007365370b11e94610b0/raw/f72004278bec97258862e730a1ef0a598cc20341/devices.json)
 - You can add as many devices as you want!
     
