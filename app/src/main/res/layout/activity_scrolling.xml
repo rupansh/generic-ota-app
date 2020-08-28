@@ -74,13 +74,12 @@
                     android:onClick="showLatZip"
                     android:layout_width="300dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center|top"
+                    android:textAlignment="viewStart"
                     android:layout_marginStart="55dp"
                     android:background="@drawable/ic_info"
                     android:drawableStart="@drawable/ic_zip"
                     android:drawableTint="#FA8E01"
                     android:text="@string/large_text"
-                    android:textAlignment="viewStart"
                     android:textColor="#FAFAFA"
                     android:textSize="18sp" />
 
@@ -134,17 +133,18 @@
                         android:textColor="#FAFAFA"
                         android:textSize="18sp" />
 
-                    <TextView
+                    <Button
                         android:id="@+id/lat_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center|top"
-                        android:layout_marginTop="5dp"
-                        android:fontFamily="sans-serif-smallcaps"
+                        android:layout_marginTop="10dp"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:background="@drawable/ic_rounded_stroke"
                         android:text="@string/lat_buttontxt"
-                        android:textColor="@android:color/background_light"
-                        android:textSize="18sp" />
-
+                        android:textColor="#FAFAFA"
+                        android:textSize="14sp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -158,13 +158,12 @@
                     android:onClick="showInfo"
                     android:layout_width="300dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center|top"
+                    android:textAlignment="viewStart"
                     android:layout_marginStart="55dp"
                     android:background="@drawable/ic_info"
                     android:drawableStart="@drawable/ic_device_color_primary"
                     android:drawableTint="#FA8E01"
                     android:text="@string/rom_info"
-                    android:textAlignment="viewStart"
                     android:textColor="#FAFAFA"
                     android:textSize="18sp" />
 
@@ -236,7 +235,7 @@
                         android:layout_marginTop="10dp"
                         android:paddingStart="20dp"
                         android:paddingEnd="20dp"
-                        android:background="@drawable/ic_rounded"
+                        android:background="@drawable/ic_rounded_stroke"
                         android:text="@string/xda_title"
                         android:textColor="#FAFAFA"
                         android:textSize="14sp" />
@@ -250,18 +249,18 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center|bottom"
                 android:layout_marginTop="40dp"
-                android:background="@drawable/ic_rounded"
+                android:background="@drawable/ic_rounded_solid"
                 android:drawableStart="@drawable/ic_refresh"
                 android:drawableTint="#FAFAFA"
                 android:paddingStart="20dp"
                 android:paddingEnd="20dp"
                 android:text="@string/updt_txt"
-                android:textAlignment="viewStart"
                 android:textColor="#FAFAFA"
                 android:textSize="14sp"
                 app:spinning_bar_color="#FAFAFA"
                 app:spinning_bar_padding="6dp"
-                app:spinning_bar_width="3dp"/>
+                app:spinning_bar_width="3dp"
+                app:initialCornerAngle="30dp"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

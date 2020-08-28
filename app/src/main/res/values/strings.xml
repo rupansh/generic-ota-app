@@ -7,7 +7,7 @@
     <string name="ourbuild">"Latest Build:"</string>
     <string name="nonet">"Please Turn on Cellular Data/WiFi!"</string>
     <string name="testbuild">"Testing Build"</string>
-    <string name="lat_buttontxt">"<u>Download</u>"</string>
+    <string name="lat_buttontxt">Download</string>
     <string name="rom_info">"    ROM Info"</string>
     <string name="xda_title">"Visit XDA Thread"</string>
     <string name="action_settings">Settings</string>
